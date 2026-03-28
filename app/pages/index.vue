@@ -3,7 +3,6 @@
     <main>
       <Hero />
       <Features />
-      <Testimonials />
       <CallToAction />
     </main>
     <Footer />
