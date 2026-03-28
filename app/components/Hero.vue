@@ -17,8 +17,13 @@
             </span>
             Meet <span class="text-primary-600 font-semibold">Planty</span> 1.0
           </div>
+          <div
+            class="title text-6xl lg:text-7xl font-title font-bold text-primary-500 mb-4"
+          >
+            Planty.
+          </div>
           <h1
-            class="text-5xl lg:text-6xl font-heading font-bold text-text-primary leading-[1.1] mb-6"
+            class="text-5xl lg:text-6xl font-heading font-bold text-text-primary mb-6"
           >
             Intelligent Plant Care,
             <span class="text-primary-600">Simplified.</span>
@@ -29,12 +34,13 @@
           </p>
 
           <div class="flex flex-col sm:flex-row gap-4">
-            <button
+            <NuxtLink
+              to="/plants"
               class="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-3.5 rounded-full text-base font-medium transition-all shadow-material hover:shadow-material-md hover:-translate-y-0.5"
             >
-              Order Now
+              Get Started
               <ArrowRight class="w-4 h-4" />
-            </button>
+            </NuxtLink>
             <button
               class="flex items-center justify-center gap-2 bg-white hover:bg-surface-50 text-text-primary border border-surface-200 px-8 py-3.5 rounded-full text-base font-medium transition-all shadow-sm hover:shadow-material"
             >

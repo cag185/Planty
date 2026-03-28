@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
-        <div class="flex items-center gap-2 cursor-pointer">
+        <NuxtLink to="/" class="flex items-center gap-2 cursor-pointer">
           <div class="bg-primary-50 p-2 rounded-lg text-primary-600">
             <Leaf class="w-5 h-5" />
           </div>
@@ -14,22 +14,23 @@
           >
             <span class="text-primary-600">Planty</span>
           </span>
-        </div>
+        </NuxtLink>
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center gap-8">
           <div class="flex gap-6">
-            <a
+            <NuxtLink
               v-for="link in navLinks"
               :key="link.name"
-              :href="link.href"
+              :to="link.to"
               class="text-sm font-medium text-text-secondary hover:text-primary-600 transition-colors"
             >
               {{ link.name }}
-            </a>
+            </NuxtLink>
           </div>
           <button
             class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-material hover:shadow-material-md"
+            @click="router.push('/plants')"
           >
             Get Started
           </button>
@@ -59,17 +60,21 @@
     >
       <div v-if="isOpen" class="md:hidden bg-white border-b border-surface-200">
         <div class="px-4 pt-2 pb-6 space-y-4 shadow-material-lg">
-          <a
+          <NuxtLink
             v-for="link in navLinks"
             :key="link.name"
-            :href="link.href"
+            :to="link.to"
             class="block text-base font-medium text-text-secondary hover:text-primary-600 py-2"
             @click="isOpen = false"
           >
             {{ link.name }}
-          </a>
+          </NuxtLink>
           <button
             class="w-full bg-primary-600 hover:bg-primary-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-material mt-4"
+            @click="
+              router.push('/plants');
+              isOpen = false;
+            "
           >
             Get Started
           </button>
@@ -83,10 +88,12 @@
 import { ref } from "vue";
 import { Leaf, Menu, X } from "lucide-vue-next";
 
+const router = useRouter();
 const isOpen = ref(false);
 
 const navLinks = [
-  { name: "Features", href: "#features" },
-  { name: "Testimonials", href: "#testimonials" },
+  { name: "Features", to: "/#features" },
+  { name: "Testimonials", to: "/#testimonials" },
+  { name: "My Plants", to: "/plants" },
 ];
 </script>

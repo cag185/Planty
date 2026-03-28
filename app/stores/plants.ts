@@ -13,6 +13,7 @@ export interface Plant {
   id: string
   name: string
   species: string
+  wateringFrequency: string
   addedAt: string
   stats: PlantStats | null
 }
@@ -28,11 +29,12 @@ export const usePlantsStore = defineStore('plants', {
   },
 
   actions: {
-    addPlant(name: string, species: string) {
+    addPlant(name: string, species: string, wateringFrequency: string = 'Weekly') {
       const plant: Plant = {
         id: crypto.randomUUID(),
         name,
         species,
+        wateringFrequency,
         addedAt: new Date().toLocaleDateString(),
         stats: null,
       }
@@ -44,10 +46,12 @@ export const usePlantsStore = defineStore('plants', {
       this.plants = this.plants.filter((p) => p.id !== id)
     },
 
-    renamePlant(id: string, newName: string) {
+    updatePlant(id: string, data: { name?: string; species?: string; wateringFrequency?: string }) {
       const plant = this.plants.find((p) => p.id === id)
       if (plant) {
-        plant.name = newName
+        if (data.name !== undefined) plant.name = data.name
+        if (data.species !== undefined) plant.species = data.species
+        if (data.wateringFrequency !== undefined) plant.wateringFrequency = data.wateringFrequency
       }
     },
 
