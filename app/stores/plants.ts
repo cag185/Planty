@@ -14,6 +14,7 @@ export interface Plant {
   name: string
   species: string
   wateringFrequency: string
+  notificationsEnabled: boolean
   addedAt: string
   stats: PlantStats | null
 }
@@ -35,7 +36,8 @@ export const usePlantsStore = defineStore('plants', {
         name,
         species,
         wateringFrequency,
-        addedAt: new Date().toLocaleDateString(),
+        notificationsEnabled: true,
+        addedAt: new Date().toISOString(),
         stats: null,
       }
       this.plants.push(plant)
@@ -59,6 +61,13 @@ export const usePlantsStore = defineStore('plants', {
       const plant = this.plants.find((p) => p.id === id)
       if (plant) {
         plant.stats = stats
+      }
+    },
+
+    toggleNotifications(id: string) {
+      const plant = this.plants.find((p) => p.id === id)
+      if (plant) {
+        plant.notificationsEnabled = !plant.notificationsEnabled
       }
     },
   },

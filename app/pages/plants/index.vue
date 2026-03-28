@@ -38,7 +38,8 @@
         <div
           v-for="plant in store.plants"
           :key="plant.id"
-          class="bg-white rounded-2xl p-6 border border-surface-100 shadow-material hover:shadow-material-md transition-shadow duration-300"
+          class="bg-white rounded-2xl p-6 border border-surface-100 shadow-material hover:shadow-material-md transition-shadow duration-300 cursor-pointer"
+          @click="router.push(`/plants/${plant.id}`)"
         >
           <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-3">
@@ -63,14 +64,14 @@
 
           <div class="flex gap-2">
             <button
-              @click="openEditForm(plant)"
+              @click.stop="openEditForm(plant)"
               class="flex-1 flex items-center justify-center gap-1.5 text-sm font-medium text-text-secondary hover:text-primary-600 bg-surface-50 hover:bg-primary-50 border border-surface-200 rounded-xl py-2 transition-colors"
             >
               <Pencil class="w-3.5 h-3.5" />
               Edit
             </button>
             <button
-              @click="deletePlant(plant.id)"
+              @click.stop="deletePlant(plant.id)"
               class="flex items-center justify-center gap-1.5 text-sm font-medium text-text-secondary hover:text-red-600 bg-surface-50 hover:bg-red-50 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
             >
               <Trash2 class="w-3.5 h-3.5" />
@@ -111,6 +112,7 @@ import { usePlantsStore } from "~/stores/plants";
 import type { Plant } from "~/stores/plants";
 
 const store = usePlantsStore();
+const router = useRouter();
 
 const showAddForm = ref(false);
 const showEditForm = ref(false);
