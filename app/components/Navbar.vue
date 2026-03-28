@@ -28,12 +28,54 @@
               {{ link.name }}
             </NuxtLink>
           </div>
-          <button
+
+          <!-- Logged in: avatar -->
+          <div v-if="auth.isLoggedIn" class="relative">
+            <button
+              @click="showUserMenu = !showUserMenu"
+              class="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold hover:bg-primary-200 transition-colors"
+            >
+              {{ auth.userInitial }}
+            </button>
+            <Transition
+              enter-active-class="transition-all duration-150 ease-out"
+              leave-active-class="transition-all duration-100 ease-in"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
+            >
+              <div
+                v-if="showUserMenu"
+                class="absolute right-0 top-12 bg-white rounded-xl shadow-material-lg border border-surface-100 py-2 w-48 z-50"
+              >
+                <div class="px-4 py-2 border-b border-surface-100">
+                  <p class="text-sm font-medium text-text-primary">
+                    {{ auth.user?.firstName }}
+                  </p>
+                  <p class="text-xs text-text-secondary truncate">
+                    {{ auth.user?.email }}
+                  </p>
+                </div>
+                <button
+                  @click="handleLogout"
+                  class="w-full text-left px-4 py-2 text-sm text-text-secondary hover:text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                >
+                  <LogOut class="w-4 h-4" />
+                  Log out
+                </button>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- Not logged in: sign in button -->
+          <NuxtLink
+            v-else
+            to="/login"
             class="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-material hover:shadow-material-md"
-            @click="router.push('/plants')"
           >
-            Get Started
-          </button>
+            Sign In
+          </NuxtLink>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -69,15 +111,38 @@
           >
             {{ link.name }}
           </NuxtLink>
-          <button
-            class="w-full bg-primary-600 hover:bg-primary-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-material mt-4"
-            @click="
-              router.push('/plants');
-              isOpen = false;
-            "
+          <div v-if="auth.isLoggedIn" class="border-t border-surface-200 pt-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold"
+              >
+                {{ auth.userInitial }}
+              </div>
+              <div>
+                <p class="text-sm font-medium text-text-primary">
+                  {{ auth.user?.firstName }}
+                </p>
+                <p class="text-xs text-text-secondary">
+                  {{ auth.user?.email }}
+                </p>
+              </div>
+            </div>
+            <button
+              @click="handleLogout"
+              class="w-full text-left text-sm text-text-secondary hover:text-red-600 py-2 flex items-center gap-2"
+            >
+              <LogOut class="w-4 h-4" />
+              Log out
+            </button>
+          </div>
+          <NuxtLink
+            v-else
+            to="/login"
+            class="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-material mt-4"
+            @click="isOpen = false"
           >
-            Get Started
-          </button>
+            Sign In
+          </NuxtLink>
         </div>
       </div>
     </Transition>
@@ -85,15 +150,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Leaf, Menu, X } from "lucide-vue-next";
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { Leaf, Menu, X, LogOut } from "lucide-vue-next";
+import { useAuthStore } from "~/stores/auth";
 
 const router = useRouter();
+const auth = useAuthStore();
 const isOpen = ref(false);
+const showUserMenu = ref(false);
 
 const navLinks = [
   { name: "Features", to: "/#features" },
-  { name: "Testimonials", to: "/#testimonials" },
   { name: "My Plants", to: "/plants" },
 ];
+
+function handleLogout() {
+  auth.logout();
+  showUserMenu.value = false;
+  isOpen.value = false;
+  router.push("/");
+}
+
+function closeUserMenu(e: MouseEvent) {
+  if (!(e.target as HTMLElement).closest(".relative")) {
+    showUserMenu.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("click", closeUserMenu);
+  auth.restoreSession();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeUserMenu);
+});
 </script>
