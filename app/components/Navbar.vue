@@ -29,6 +29,20 @@
             </NuxtLink>
           </div>
 
+          <!-- Notifications bell -->
+          <NuxtLink
+            to="/notifications"
+            class="relative text-text-secondary hover:text-primary-600 transition-colors p-1"
+          >
+            <Bell class="w-5 h-5" />
+            <span
+              v-if="notifStore.unreadCount > 0"
+              class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
+            >
+              {{ notifStore.unreadCount > 9 ? "9+" : notifStore.unreadCount }}
+            </span>
+          </NuxtLink>
+
           <!-- Logged in: avatar -->
           <div v-if="auth.isLoggedIn" class="relative">
             <button
@@ -111,6 +125,19 @@
           >
             {{ link.name }}
           </NuxtLink>
+          <NuxtLink
+            to="/notifications"
+            class="flex items-center gap-2 text-base font-medium text-text-secondary hover:text-primary-600 py-2"
+            @click="isOpen = false"
+          >
+            Notifications
+            <span
+              v-if="notifStore.unreadCount > 0"
+              class="w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
+            >
+              {{ notifStore.unreadCount > 9 ? "9+" : notifStore.unreadCount }}
+            </span>
+          </NuxtLink>
           <div v-if="auth.isLoggedIn" class="border-t border-surface-200 pt-4">
             <div class="flex items-center gap-3 mb-3">
               <div
@@ -151,11 +178,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import { Leaf, Menu, X, LogOut } from "lucide-vue-next";
+import { Leaf, Menu, X, LogOut, Bell } from "lucide-vue-next";
 import { useAuthStore } from "~/stores/auth";
+import { useNotificationsStore } from "~/stores/notifications";
 
 const router = useRouter();
 const auth = useAuthStore();
+const notifStore = useNotificationsStore();
 const isOpen = ref(false);
 const showUserMenu = ref(false);
 

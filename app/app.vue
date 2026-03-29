@@ -4,5 +4,20 @@
   >
     <Navbar />
     <NuxtPage />
+    <ToastNotifications />
   </div>
 </template>
+
+<script setup lang="ts">
+import { useDemoNotifications } from "~/composables/useDemoNotifications";
+
+const demo = useDemoNotifications();
+
+onMounted(() => {
+  demo.start();
+});
+
+onUnmounted(() => {
+  demo.stop();
+});
+</script>

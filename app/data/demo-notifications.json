@@ -1,0 +1,51 @@
+[
+  {
+    "delaySeconds": 2,
+    "type": "autonomous",
+    "title": "Auto-watered",
+    "message": "Monstera Deliciosa was automatically watered based on soil moisture readings.",
+    "plantName": "Monstera Deliciosa"
+  },
+  {
+    "delaySeconds": 5,
+    "type": "requirement",
+    "title": "Watering needed",
+    "message": "Snake Plant soil moisture is below 20%. Please water your plant soon.",
+    "plantName": "Snake Plant"
+  },
+  {
+    "delaySeconds": 8,
+    "type": "autonomous",
+    "title": "Stats update",
+    "message": "Scheduled stat check complete for Fiddle Leaf Fig. Humidity: 58%, Temp: 74°F, Light: moderate.",
+    "plantName": "Fiddle Leaf Fig"
+  },
+  {
+    "delaySeconds": 11,
+    "type": "requirement",
+    "title": "Temperature alert",
+    "message": "Pothos environment temperature has dropped below 55°F. Consider moving the plant to a warmer spot.",
+    "plantName": "Pothos"
+  },
+  {
+    "delaySeconds": 14,
+    "type": "autonomous",
+    "title": "Light adjustment",
+    "message": "Grow light for Peace Lily was dimmed to 60% for the evening cycle.",
+    "plantName": "Peace Lily"
+  },
+  {
+    "delaySeconds": 17,
+    "type": "requirement",
+    "title": "Fertilizer reminder",
+    "message": "Snake Plant hasn't been fertilized in 30 days. Consider adding a balanced liquid fertilizer.",
+    "plantName": "Snake Plant"
+  },
+  {
+    "delaySeconds": 20,
+    "type": "autonomous",
+    "title": "Humidity adjusted",
+    "message": "Humidifier near Monstera Deliciosa activated — ambient humidity was 35%, target is 55%.",
+    "plantName": "Monstera Deliciosa"
+  }
+]
