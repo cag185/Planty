@@ -65,7 +65,7 @@
               >
                 <div class="px-4 py-2 border-b border-surface-100">
                   <p class="text-sm font-medium text-text-primary">
-                    {{ auth.user?.firstName }}
+                    {{ auth.user?.name }}
                   </p>
                   <p class="text-xs text-text-secondary truncate">
                     {{ auth.user?.email }}
@@ -147,7 +147,7 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-text-primary">
-                  {{ auth.user?.firstName }}
+                  {{ auth.user?.name }}
                 </p>
                 <p class="text-xs text-text-secondary">
                   {{ auth.user?.email }}

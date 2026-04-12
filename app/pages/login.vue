@@ -119,20 +119,22 @@ function toggleMode() {
   error.value = "";
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   error.value = "";
 
   if (isSignup.value) {
-    const success = auth.signup(firstName.value, email.value, password.value);
-    if (success) {
-      router.push("/plants");
-    }
-  } else {
-    const success = auth.login(email.value, password.value);
+    const success = await auth.signup(firstName.value, email.value, password.value);
     if (success) {
       router.push("/plants");
     } else {
-      error.value = "No account found with that email. Please sign up first.";
+      error.value = "Sign up failed. Please try again.";
+    }
+  } else {
+    const success = await auth.login(email.value, password.value);
+    if (success) {
+      router.push("/plants");
+    } else {
+      error.value = "Invalid email or password.";
     }
   }
 }

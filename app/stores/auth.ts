@@ -1,52 +1,64 @@
 import { defineStore } from 'pinia'
 
 export interface User {
-  firstName: string
+  id: number
+  name: string
   email: string
 }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
+    token: null as string | null,
   }),
 
   getters: {
     isLoggedIn: (state) => !!state.user,
-    userInitial: (state) => state.user?.firstName?.charAt(0).toUpperCase() || '',
+    userInitial: (state) => state.user?.name?.charAt(0).toUpperCase() || '',
   },
 
   actions: {
-    login(email: string, _password: string) {
-      // Stub: in the future this will call an API
-      // For now, check if a user was previously "signed up" in this session
-      const stored = sessionStorage.getItem('planty_user')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed.email === email) {
-          this.user = parsed
-          return true
-        }
+    async login(email: string, password: string): Promise<boolean> {
+      try {
+        const response = await $fetch<{ token: string; user: User }>('http://localhost:8080/users/login', {
+          method: 'POST',
+          body: { email, password },
+        })
+        this.user = response.user
+        this.token = response.token
+        sessionStorage.setItem('planty_user', JSON.stringify(response.user))
+        sessionStorage.setItem('planty_token', response.token)
+        return true
+      } catch {
+        return false
       }
-      return false
     },
 
-    signup(firstName: string, email: string, _password: string) {
-      // Stub: in the future this will call an API
-      const user: User = { firstName, email }
-      sessionStorage.setItem('planty_user', JSON.stringify(user))
-      this.user = user
-      return true
+    async signup(name: string, email: string, password: string): Promise<boolean> {
+      try {
+        await $fetch('http://localhost:8080/users/', {
+          method: 'POST',
+          body: { name, email, password },
+        })
+        return await this.login(email, password)
+      } catch {
+        return false
+      }
     },
 
     logout() {
       this.user = null
+      this.token = null
       sessionStorage.removeItem('planty_user')
+      sessionStorage.removeItem('planty_token')
     },
 
     restoreSession() {
       const stored = sessionStorage.getItem('planty_user')
-      if (stored) {
+      const token = sessionStorage.getItem('planty_token')
+      if (stored && token) {
         this.user = JSON.parse(stored)
+        this.token = token
       }
     },
   },
