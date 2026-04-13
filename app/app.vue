@@ -9,15 +9,15 @@
 </template>
 
 <script setup lang="ts">
-import { useDemoNotifications } from "~/composables/useDemoNotifications";
+// import { useDemoNotifications } from "~/composables/useDemoNotifications";
 
-const demo = useDemoNotifications();
+// const demo = useDemoNotifications();
 
-onMounted(() => {
-  demo.start();
-});
+// onMounted(() => {
+//   demo.start();
+// });
 
-onUnmounted(() => {
-  demo.stop();
-});
+// onUnmounted(() => {
+//   demo.stop();
+// });
 </script>

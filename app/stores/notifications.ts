@@ -80,35 +80,35 @@ export const useNotificationsStore = defineStore('notifications', {
     },
 
     // Demo helper: seed some sample notifications
-    // seedDemoNotifications(plantId: string, plantName: string) {
-    //   this.addNotification({
-    //     type: 'autonomous',
-    //     title: 'Auto-watered',
-    //     message: `${plantName} was automatically watered based on soil moisture readings.`,
-    //     plantId,
-    //     plantName,
-    //   })
-    //   this.addNotification({
-    //     type: 'autonomous',
-    //     title: 'Stats update',
-    //     message: `Scheduled stat check complete for ${plantName}. Humidity: 65%, Temp: 72°F, Light: good.`,
-    //     plantId,
-    //     plantName,
-    //   })
-    //   this.addNotification({
-    //     type: 'requirement',
-    //     title: 'Watering needed',
-    //     message: `${plantName} soil moisture is below 20%. Please water your plant soon.`,
-    //     plantId,
-    //     plantName,
-    //   })
-    //   this.addNotification({
-    //     type: 'requirement',
-    //     title: 'Temperature alert',
-    //     message: `${plantName} environment temperature has exceeded 90°F. Consider moving the plant to a cooler area.`,
-    //     plantId,
-    //     plantName,
-    //   })
-    //},
+    seedDemoNotifications(plantId: string, plantName: string) {
+      this.addNotification({
+        type: 'autonomous',
+        title: 'Auto-watered',
+        message: `${plantName} was automatically watered based on soil moisture readings.`,
+        plantId,
+        plantName,
+      })
+      this.addNotification({
+        type: 'autonomous',
+        title: 'Stats update',
+        message: `Scheduled stat check complete for ${plantName}. Humidity: 65%, Temp: 72°F, Light: good.`,
+        plantId,
+        plantName,
+      })
+      this.addNotification({
+        type: 'requirement',
+        title: 'Watering needed',
+        message: `${plantName} soil moisture is below 20%. Please water your plant soon.`,
+        plantId,
+        plantName,
+      })
+      this.addNotification({
+        type: 'requirement',
+        title: 'Temperature alert',
+        message: `${plantName} environment temperature has exceeded 90°F. Consider moving the plant to a cooler area.`,
+        plantId,
+        plantName,
+      })
+    },
   },
 })
