@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { Leaf, Plus, Pencil, Trash2, Droplets, Sprout } from "lucide-vue-next";
 import { usePlantsStore } from "~/stores/plants";
 import type { Plant } from "~/stores/plants";
@@ -117,6 +117,10 @@ const router = useRouter();
 const showAddForm = ref(false);
 const showEditForm = ref(false);
 const editingPlant = ref<Plant | null>(null);
+
+onMounted(() => {
+  store.fetchPlants();
+});
 
 function openAddForm() {
   showAddForm.value = true;
@@ -132,27 +136,27 @@ function closeEditForm() {
   editingPlant.value = null;
 }
 
-function onAddPlant(data: {
+async function onAddPlant(data: {
   name: string;
   species: string;
   wateringFrequency: string;
 }) {
-  store.addPlant(data.name, data.species, data.wateringFrequency);
+  await store.addPlant(data.name, data.species, data.wateringFrequency);
   showAddForm.value = false;
 }
 
-function onEditPlant(data: {
+async function onEditPlant(data: {
   name: string;
   species: string;
   wateringFrequency: string;
 }) {
   if (editingPlant.value) {
-    store.updatePlant(editingPlant.value.id, data);
+    await store.updatePlant(editingPlant.value.id, data);
   }
   closeEditForm();
 }
 
-function deletePlant(id: string) {
-  store.removePlant(id);
+async function deletePlant(id: string) {
+  await store.removePlant(id);
 }
 </script>
