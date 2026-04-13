@@ -89,12 +89,12 @@ export const usePlantsStore = defineStore('plants', {
       this.plants = data.map(mapApiPlant)
     },
 
-    async addPlant(name: string, species: string, wateringFrequency: string = 'Weekly') {
+    async addPlant(name: string, species: string, wateringFrequency: string = 'Weekly', userId: number) {
       const auth = useAuthStore()
       const data = await $fetch<ApiPlant>(`${BASE_URL}/plants/`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${auth.token}` },
-        body: { name, species, watering_frequency_days: wateringFrequencyToDays(wateringFrequency) },
+        body: { name, species, watering_frequency_days: wateringFrequencyToDays(wateringFrequency), user_id: userId },
       })
       const plant = mapApiPlant(data)
       this.plants.push(plant)

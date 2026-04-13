@@ -109,7 +109,10 @@
 import { ref, onMounted } from "vue";
 import { Leaf, Plus, Pencil, Trash2, Droplets, Sprout } from "lucide-vue-next";
 import { usePlantsStore } from "~/stores/plants";
+import { useAuthStore } from "~/stores/auth";
 import type { Plant } from "~/stores/plants";
+
+const auth = useAuthStore();
 
 const store = usePlantsStore();
 const router = useRouter();
@@ -141,7 +144,12 @@ async function onAddPlant(data: {
   species: string;
   wateringFrequency: string;
 }) {
-  await store.addPlant(data.name, data.species, data.wateringFrequency);
+  await store.addPlant(
+    data.name,
+    data.species,
+    data.wateringFrequency,
+    auth.user?.id || "",
+  );
   showAddForm.value = false;
 }
 
