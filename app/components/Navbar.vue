@@ -197,6 +197,8 @@ function handleLogout() {
   auth.logout();
   showUserMenu.value = false;
   isOpen.value = false;
+  const plantsStore = usePlantsStore();
+  plantsStore.clearPlants();
   router.push("/");
 }
 

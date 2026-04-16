@@ -76,12 +76,11 @@ export const usePlantsStore = defineStore('plants', {
   actions: {
     async fetchPlants() {
       const auth = useAuthStore()
-      if (!auth.user || !auth.token) 
-        {
-          console.log('No user logged in, skipping plant fetch');
-          return;
-        }
-      const data = await $fetch<ApiPlant[]>(`${BASE_URL}/plants/`, {
+      if (!auth.user || !auth.token) {
+        console.log('No user logged in, skipping plant fetch');
+        return;
+      }
+      const data = await $fetch<ApiPlant[]>(`${BASE_URL}/plants/user/`, {
         headers: { Authorization: `Bearer ${auth.token}` },
         method: 'GET',
         query: { user_id: auth.user.id },
@@ -89,7 +88,7 @@ export const usePlantsStore = defineStore('plants', {
       this.plants = data.map(mapApiPlant)
     },
 
-    async addPlant(name: string, species: string, wateringFrequency: string = 'Weekly', userId: number) {
+    async addPlant(name: string, species: string, wateringFrequency: string = 'Weekly', userId?: number) {
       const auth = useAuthStore()
       const data = await $fetch<ApiPlant>(`${BASE_URL}/plants/`, {
         method: 'POST',
@@ -142,5 +141,9 @@ export const usePlantsStore = defineStore('plants', {
         plant.notificationsEnabled = !plant.notificationsEnabled
       }
     },
+
+    clearPlants() {
+      this.plants = []
+    }
   },
 })

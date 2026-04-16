@@ -221,7 +221,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, watch } from "vue";
 import {
   Leaf,
   ArrowLeft,
@@ -238,6 +238,21 @@ import { usePlantsStore } from "~/stores/plants";
 const route = useRoute();
 const router = useRouter();
 const store = usePlantsStore();
+
+onMounted(() => {
+  if (store.plants.length === 0) {
+    store.fetchPlants();
+  }
+});
+
+watch(
+  () => route.params.id,
+  () => {
+    if (store.plants.length === 0) {
+      store.fetchPlants();
+    }
+  }
+);
 
 const plant = computed(() => store.getPlantById(route.params.id as string));
 

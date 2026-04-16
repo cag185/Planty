@@ -148,7 +148,7 @@ async function onAddPlant(data: {
     data.name,
     data.species,
     data.wateringFrequency,
-    auth.user?.id || "",
+    auth.user?.id,
   );
   showAddForm.value = false;
 }
