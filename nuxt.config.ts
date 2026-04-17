@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL ?? 'https://planty-api-production.up.railway.app',
+      apiBaseUrl: import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:8080/',
     },
   },
   devtools: { enabled: true },
