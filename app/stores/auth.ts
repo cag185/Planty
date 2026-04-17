@@ -20,7 +20,8 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(email: string, password: string): Promise<boolean> {
       try {
-        const response = await $fetch<{ token: string; user: User }>('http://localhost:8080/users/login', {
+        const { apiBaseUrl } = useRuntimeConfig().public
+        const response = await $fetch<{ token: string; user: User }>(`${apiBaseUrl}/users/login`, {
           method: 'POST',
           body: { email, password },
         })
@@ -36,7 +37,8 @@ export const useAuthStore = defineStore('auth', {
 
     async signup(name: string, email: string, password: string): Promise<boolean> {
       try {
-        await $fetch('http://localhost:8080/users/', {
+        const { apiBaseUrl } = useRuntimeConfig().public
+        await $fetch(`${apiBaseUrl}/users/`, {
           method: 'POST',
           body: { name, email, password },
         })

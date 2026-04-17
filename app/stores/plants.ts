@@ -30,7 +30,7 @@ interface ApiPlant {
   date_deleted: string | null
 }
 
-const BASE_URL = 'http://localhost:8080'
+const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
 
 function wateringFrequencyToDays(freq: string): number {
   if (freq === 'Daily') return 1
@@ -80,7 +80,7 @@ export const usePlantsStore = defineStore('plants', {
         console.log('No user logged in, skipping plant fetch');
         return;
       }
-      const data = await $fetch<ApiPlant[]>(`${BASE_URL}/plants/user/`, {
+      const data = await $fetch<ApiPlant[]>(`${BASE_URL()}/plants/user/`, {
         headers: { Authorization: `Bearer ${auth.token}` },
         method: 'GET',
         query: { user_id: auth.user.id },
@@ -90,7 +90,7 @@ export const usePlantsStore = defineStore('plants', {
 
     async addPlant(name: string, species: string, wateringFrequency: string = 'Weekly', userId?: number) {
       const auth = useAuthStore()
-      const data = await $fetch<ApiPlant>(`${BASE_URL}/plants/`, {
+      const data = await $fetch<ApiPlant>(`${BASE_URL()}/plants/`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${auth.token}` },
         body: { name, species, watering_frequency_days: wateringFrequencyToDays(wateringFrequency), user_id: userId },
@@ -102,7 +102,7 @@ export const usePlantsStore = defineStore('plants', {
 
     async removePlant(id: string) {
       const auth = useAuthStore()
-      await $fetch(`${BASE_URL}/plants/${id}`, {
+      await $fetch(`${BASE_URL()}/plants/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${auth.token}` },
       })
@@ -115,7 +115,7 @@ export const usePlantsStore = defineStore('plants', {
       if (data.name !== undefined) body.name = data.name
       if (data.species !== undefined) body.species = data.species
       if (data.wateringFrequency !== undefined) body.watering_frequency_days = wateringFrequencyToDays(data.wateringFrequency)
-      await $fetch(`${BASE_URL}/plants/${id}`, {
+      await $fetch(`${BASE_URL()}/plants/${id}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${auth.token}` },
         body,
