@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   runtimeConfig: {
     public: {
-      apiBaseUrl: import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:8080/',
+      apiBaseUrl: 'http://localhost:8080',
     },
   },
   devtools: { enabled: true },
