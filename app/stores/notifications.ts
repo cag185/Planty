@@ -10,7 +10,7 @@ export interface AppNotification {
   plantId?: string
   plantName?: string
   createdAt: string
-  read: boolean
+  acknowledged: boolean
   completed: boolean
 }
 
@@ -20,7 +20,7 @@ export const useNotificationsStore = defineStore('notifications', {
   }),
 
   getters: {
-    unreadCount: (state) => state.notifications.filter((n) => !n.read).length,
+    unreadCount: (state) => state.notifications.filter((n) => !n.acknowledged).length,
     sortedNotifications: (state) =>
       [...state.notifications].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -45,7 +45,7 @@ export const useNotificationsStore = defineStore('notifications', {
         id: crypto.randomUUID(),
         ...data,
         createdAt: new Date().toISOString(),
-        read: false,
+        acknowledged: false,
         completed: false,
       }
       this.notifications.push(notification)
@@ -55,7 +55,7 @@ export const useNotificationsStore = defineStore('notifications', {
     acknowledge(id: string) {
       const n = this.notifications.find((n) => n.id === id)
       if (n) {
-        n.read = true
+        n.acknowledged = true
       }
     },
 
@@ -63,7 +63,7 @@ export const useNotificationsStore = defineStore('notifications', {
       const n = this.notifications.find((n) => n.id === id)
       if (n) {
         n.completed = true
-        n.read = true
+        n.acknowledged = true
       }
     },
 
@@ -76,7 +76,7 @@ export const useNotificationsStore = defineStore('notifications', {
     },
 
     markAllRead() {
-      this.notifications.forEach((n) => (n.read = true))
+      this.notifications.forEach((n) => (n.acknowledged = true))
     },
 
     // Demo helper: seed some sample notifications
