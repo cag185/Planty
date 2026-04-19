@@ -40,7 +40,19 @@
           <option>Weekly</option>
           <option>Bi-weekly</option>
           <option>Monthly</option>
+          <option>Custom</option>
         </select>
+      </div>
+      <div v-if="wateringFrequency === 'Custom'">
+        <label class="block text-sm font-medium text-text-primary mb-1.5">
+          Custom Frequency (in days)
+        </label>
+        <input
+          v-model="customFrequency"
+          type="text"
+          placeholder="e.g. Every 10 days"
+          class="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+        />
       </div>
 
       <div class="flex gap-3 pt-2">
@@ -79,6 +91,7 @@ const emit = defineEmits<{
 const name = ref("");
 const species = ref("");
 const wateringFrequency = ref("Weekly");
+const customFrequency = ref("");
 
 watch(
   () => props.plant,
@@ -96,7 +109,10 @@ function onSubmit() {
   emit("submit", {
     name: name.value,
     species: species.value,
-    wateringFrequency: wateringFrequency.value,
+    wateringFrequency:
+      wateringFrequency.value === "Custom"
+        ? customFrequency.value
+        : wateringFrequency.value,
   });
 }
 </script>
