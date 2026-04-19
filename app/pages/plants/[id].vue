@@ -47,15 +47,33 @@
               <p class="text-text-secondary">{{ plant.species }}</p>
             </div>
           </div>
-          <button
-            @click="handleRemove"
-            class="flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-red-600 bg-surface-50 hover:bg-red-50 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+          <div
+            class="flex flex-col w-1/2 items-center sm:flex-row gap-2 sm:gap-8"
           >
-            <Trash2 class="w-4 h-4" />
-            Remove
-          </button>
+            <button
+              @click="showEditModal = true"
+              class="flex items-center gap-1.5 w-32 text-sm font-medium text-text-secondary hover:text-primary-600 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+            >
+              <Pencil class="w-4 h-4" />
+              Edit Plant
+            </button>
+            <button
+              @click="handleRemove"
+              class="flex items-center gap-1.5 w-32 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-200 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+            >
+              <Trash2 class="w-4 h-4" />
+              Remove
+            </button>
+          </div>
         </div>
 
+        <!-- Modals -->
+        <EditPlantModal
+          :show="showEditModal"
+          :plant="plant"
+          @close="showEditModal = false"
+          @submit="onEditPlant"
+        />
         <!-- Info Cards -->
         <div class="grid sm:grid-cols-2 gap-4 mb-8">
           <div class="bg-surface-50 rounded-2xl p-5 border border-surface-100">
@@ -239,6 +257,25 @@ const route = useRoute();
 const router = useRouter();
 const store = usePlantsStore();
 
+// Compute the current plant based on the route parameter
+const plant = computed(() => store.getPlantById(route.params.id as string));
+
+// control the edit modal.
+const showEditModal = ref(false);
+
+async function onEditPlant(data: {
+  name: string;
+  species: string;
+  wateringFrequency: string;
+}) {
+  if (!plant.value) {
+    return;
+  }
+
+  await store.updatePlant(plant.value.id, data);
+  showEditModal.value = false;
+}
+
 onMounted(() => {
   if (store.plants.length === 0) {
     store.fetchPlants();
@@ -251,10 +288,8 @@ watch(
     if (store.plants.length === 0) {
       store.fetchPlants();
     }
-  }
+  },
 );
-
-const plant = computed(() => store.getPlantById(route.params.id as string));
 
 const formattedDate = computed(() => {
   if (!plant.value) return "";
