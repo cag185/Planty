@@ -35,7 +35,7 @@
 
           <div class="flex flex-col sm:flex-row gap-4">
             <NuxtLink
-              to="/plants"
+              to="/login"
               class="flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-3.5 rounded-full text-base font-medium transition-all shadow-material hover:shadow-material-md hover:-translate-y-0.5"
             >
               Get Started

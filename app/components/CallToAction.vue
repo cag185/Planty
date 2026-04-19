@@ -24,9 +24,10 @@
             system.
           </p>
           <button
+            @click="signUp()"
             class="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-full text-lg font-medium transition-all shadow-material hover:shadow-material-md hover:-translate-y-0.5"
           >
-            Get Planty Now
+            Sign Up With Planty Now
             <ArrowRight class="w-5 h-5" />
           </button>
         </div>
@@ -37,4 +38,9 @@
 
 <script setup lang="ts">
 import { ArrowRight } from "lucide-vue-next";
+const router = useRouter();
+
+const signUp = () => {
+  router.push("/login");
+};
 </script>
