@@ -1,114 +1,141 @@
 import { defineStore } from 'pinia'
+import { useAuthStore } from '~/stores/auth'
 
-export type NotificationType = 'autonomous' | 'requirement'
-
-export interface AppNotification {
-  id: string
-  type: NotificationType
-  title: string
-  message: string
-  plantId?: string
-  plantName?: string
-  createdAt: string
-  acknowledged: boolean
-  completed: boolean
+// Map the ids to the type.
+export type NotificationType = Record<number, string>
+// In the future this should be its own network call to fetch the types, but for now we can hardcode it since we only have 2 types.
+export const notificationTypes: NotificationType = {
+  1: 'update',
+  2: 'requirement',
 }
 
-export const useNotificationsStore = defineStore('notifications', {
-  state: () => ({
-    notifications: [] as AppNotification[],
-  }),
+// Define a notification class.
+export interface Notification {
+  id: number
+  typeId: number
+  title: string
+  message: string
+  plantId?: number
+  userId?: number
+  acknowledged: boolean
+  dateAcknowledged?: Date
+  completed: boolean
+  dateCompleted?: Date
+  dateCreated: Date
+}
 
-  getters: {
-    unreadCount: (state) => state.notifications.filter((n) => !n.acknowledged).length,
-    sortedNotifications: (state) =>
-      [...state.notifications].sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ),
-    autonomousNotifications(): AppNotification[] {
-      return this.sortedNotifications.filter((n) => n.type === 'autonomous')
-    },
-    requirementNotifications(): AppNotification[] {
-      return this.sortedNotifications.filter((n) => n.type === 'requirement')
-    },
-  },
+// Define the base URL for the API.
+const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
 
-  actions: {
-    addNotification(data: {
-      type: NotificationType
-      title: string
-      message: string
-      plantId?: string
-      plantName?: string
-    }) {
-      const notification: AppNotification = {
-        id: crypto.randomUUID(),
-        ...data,
-        createdAt: new Date().toISOString(),
-        acknowledged: false,
-        completed: false,
-      }
-      this.notifications.push(notification)
-      return notification
-    },
+export const useNotificationsStore = defineStore('notifications', () => {
+  const notifications = ref<Notification[]>([])
+  const unreadCount = ref(0);
 
-    acknowledge(id: string) {
-      const n = this.notifications.find((n) => n.id === id)
-      if (n) {
-        n.acknowledged = true
-      }
-    },
+  // Set the user auth store instance.
+  const authStore = useAuthStore()
 
-    markCompleted(id: string) {
-      const n = this.notifications.find((n) => n.id === id)
-      if (n) {
-        n.completed = true
-        n.acknowledged = true
-      }
-    },
+  // Get the user and then fetch notifications for that user from the API.
+  const getNotifications = async () => {
 
-    dismiss(id: string) {
-      this.notifications = this.notifications.filter((n) => n.id !== id)
-    },
+    if (authStore.user == null) 
+    {
+      return;
+    }
 
-    clearAll() {
-      this.notifications = []
-    },
+    const data = await $fetch<Notification[]>(`${BASE_URL()}/notifications?userId=${authStore?.user?.id}`,
+      {
+        headers: { authorization: `Bearer ${authStore.token}` },
+        method: 'GET',
+        query: { userId: authStore?.user?.id },
+      })
+    notifications.value = data;
+    unreadCount.value = notifications.value.filter((n) => !n.acknowledged).length;
+  }
+  
+  const updateNotifications = computed(() => {
+    return notifications.value.filter((n) => n.typeId === 1)
+  });
 
-    markAllRead() {
-      this.notifications.forEach((n) => (n.acknowledged = true))
-    },
+  const requirementNotifications = computed((): Notification[] => {
+    return notifications.value.filter((n) => n.typeId === 2)
+  });
+
+  const markAsAcknowledged = async (notificationId: number) => {
+    await $fetch(`${BASE_URL()}/notifications/${notificationId}/acknowledge`, {
+      headers: { authorization: `Bearer ${authStore.token}` },
+      method: 'POST',
+    })
+    await getNotifications()
+  }
+
+  const markAsCompleted = async (notificationId: number) => {
+    await $fetch(`${BASE_URL()}/notifications/${notificationId}/complete`, {
+      headers: { authorization: `Bearer ${authStore.token}` },
+      method: 'POST',
+    })
+    await getNotifications()
+  }
+
+  // @TODO - make another API endpoint for this.
+  const markAllAcknowledged = async () => {
+    await $fetch(`${BASE_URL()}/notifications/acknowledge-all`, {
+      headers: { authorization: `Bearer ${authStore.token}` },
+      method: 'POST',
+    })
+    await getNotifications()
+  }
+
+  // @TODO - make another API endpoint for this.
+  const markAllCompleted = async () => {
+    await $fetch(`${BASE_URL()}/notifications/complete-all`, {
+      headers: { authorization: `Bearer ${authStore.token}` },
+      method: 'POST',
+    })
+    await getNotifications()
+  }
+
+  return {
+    notifications,
+    unreadCount,
+    updateNotifications,
+    requirementNotifications,
+    getNotifications,
+    markAsAcknowledged,
+    markAsCompleted,
+    markAllAcknowledged,  // @TODO - make another API endpoint for this.
+    markAllCompleted,  // @TODO - make another API endpoint for this.
+  }
+
+});
 
     // Demo helper: seed some sample notifications
-    seedDemoNotifications(plantId: string, plantName: string) {
-      this.addNotification({
-        type: 'autonomous',
-        title: 'Auto-watered',
-        message: `${plantName} was automatically watered based on soil moisture readings.`,
-        plantId,
-        plantName,
-      })
-      this.addNotification({
-        type: 'autonomous',
-        title: 'Stats update',
-        message: `Scheduled stat check complete for ${plantName}. Humidity: 65%, Temp: 72°F, Light: good.`,
-        plantId,
-        plantName,
-      })
-      this.addNotification({
-        type: 'requirement',
-        title: 'Watering needed',
-        message: `${plantName} soil moisture is below 20%. Please water your plant soon.`,
-        plantId,
-        plantName,
-      })
-      this.addNotification({
-        type: 'requirement',
-        title: 'Temperature alert',
-        message: `${plantName} environment temperature has exceeded 90°F. Consider moving the plant to a cooler area.`,
-        plantId,
-        plantName,
-      })
-    },
-  },
-})
+    // seedDemoNotifications(plantId: number, plantName: string) {
+    //   this.addNotification({
+    //     type: 'update',
+    //     title: 'Auto-watered',
+    //     message: `${plantName} was automatically watered based on soil moisture readings.`,
+    //     plantId,
+    //     userId: 1,
+    //   })
+    //   this.addNotification({
+    //     type: 'update',
+    //     title: 'Stats update',
+    //     message: `Scheduled stat check complete for ${plantName}. Humidity: 65%, Temp: 72°F, Light: good.`,
+    //     plantId,
+    //     userId: 1,
+    //   })
+    //   this.addNotification({
+    //     type: 'requirement',
+    //     title: 'Watering needed',
+    //     message: `${plantName} soil moisture is below 20%. Please water your plant soon.`,
+    //     plantId,
+    //     userId: 1,
+    //   })
+    //   this.addNotification({
+    //     type: 'requirement',
+    //     title: 'Temperature alert',
+    //     message: `${plantName} environment temperature has exceeded 90°F. Consider moving the plant to a cooler area.`,
+    //     plantId,
+    //     userId: 1,
+    //   })
+    // },
