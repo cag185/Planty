@@ -184,6 +184,8 @@ import { useNotificationsStore } from "~/stores/notifications";
 
 const router = useRouter();
 const auth = useAuthStore();
+const plantStore = usePlantsStore();
+const notificationStore = useNotificationsStore();
 const notifStore = useNotificationsStore();
 const isOpen = ref(false);
 const showUserMenu = ref(false);
@@ -197,8 +199,8 @@ function handleLogout() {
   auth.logout();
   showUserMenu.value = false;
   isOpen.value = false;
-  const plantsStore = usePlantsStore();
-  plantsStore.clearPlants();
+  plantStore.clearPlants();
+  notificationStore.clearNotifications();
   router.push("/");
 }
 
