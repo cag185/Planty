@@ -9,23 +9,78 @@ export const notificationTypes: NotificationType = {
   2: 'requirement',
 }
 
-// Define a notification class.
-export interface Notification {
+// Define a usable Notication class.
+export class Notification {
   id: number
-  typeId: number
+  dateCreated: string
+  dateDeleted: string | null
+  dateUpdated: string
+  typeName: string
+  userId: number
+  plantId: number
+  dateAcknowledged: string | null
+  dateCompleted: string | null
+  acknowledged: boolean
+  completed: boolean
   title: string
   message: string
-  plantId?: number
-  userId?: number
+
+  constructor(data: any) {
+    this.id = data.id;
+    this.dateCreated = (data.date_created);
+    this.dateDeleted = data.date_deleted ? (data.date_deleted) : null;
+    this.dateUpdated = (data.date_updated);
+    this.typeName = notificationTypes[data.notification_type_id] || 'unknown';
+    this.userId = data.users_user_id;
+    this.plantId = data.plant_id;
+    this.dateAcknowledged = data.date_acknowledged ? (data.date_acknowledged) : null;
+    this.dateCompleted = data.date_completed ? (data.date_completed) : null;
+    this.acknowledged = data.acknowledged;
+    this.completed = data.completed;
+    this.title = data.title;
+    this.message = data.message;
+  }
+}
+
+// Define a notification interface.
+export interface ApiNotification {
+  id: number
+  date_created: Date,
+  date_deleted: Date | null,
+  date_updated: Date,
+  notification_type_id: number
+  users_user_id: number
+  plant_id: number
+  date_acknowledged: Date | null
+  date_completed: Date | null
   acknowledged: boolean
-  dateAcknowledged?: Date
   completed: boolean
-  dateCompleted?: Date
-  dateCreated: Date
+  title: string
+  message: string
+}
+
+// Define a function to map the API response to the Notification class.
+const mapApiNotification = (n: ApiNotification): Notification => {
+  return {
+    id: n.id,
+    dateCreated: (n.date_created).toString(),
+    dateDeleted: n.date_deleted ? (n.date_deleted).toString() : null,
+    dateUpdated: (n.date_updated).toString(),
+    typeName: notificationTypes[n.notification_type_id] || 'unknown',
+    userId: n.users_user_id,
+    plantId: n.plant_id,
+    dateAcknowledged: n.date_acknowledged ? (n.date_acknowledged).toString() : null,
+    dateCompleted: n.date_completed ? (n.date_completed).toString() : null,
+    acknowledged: n.acknowledged,
+    completed: n.completed,
+    title: n.title,
+    message: n.message,
+  }
 }
 
 // Define the base URL for the API.
 const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
+
 
 export const useNotificationsStore = defineStore('notifications', () => {
   const notifications = ref<Notification[]>([])
@@ -36,41 +91,46 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
   // Get the user and then fetch notifications for that user from the API.
   const getNotifications = async () => {
-
+    // console.log('API Base URL:', BASE_URL())
     if (authStore.user == null) 
     {
+      console.log('No user logged in, skipping notification fetch');
       return;
     }
+    console.log('Fetching notifications for user:', authStore.user?.id);
 
-    const data = await $fetch<Notification[]>(`${BASE_URL()}/notifications?userId=${authStore?.user?.id}`,
+    const data = await $fetch<ApiNotification[]>(`${BASE_URL()}/notifications/`,
       {
         headers: { authorization: `Bearer ${authStore.token}` },
         method: 'GET',
-        query: { userId: authStore?.user?.id },
+        query: { user_id: authStore?.user?.id },
       })
-    notifications.value = data;
+      console.log('Fetched notifications:', data);
+    notifications.value = data.map(mapApiNotification).filter((n) => !n.completed);
     unreadCount.value = notifications.value.filter((n) => !n.acknowledged).length;
   }
   
   const updateNotifications = computed(() => {
-    return notifications.value.filter((n) => n.typeId === 1)
+    return notifications.value.filter((n) => n.typeName === 'update')
   });
 
   const requirementNotifications = computed((): Notification[] => {
-    return notifications.value.filter((n) => n.typeId === 2)
+    return notifications.value.filter((n) => n.typeName === 'requirement')
   });
 
   const markAsAcknowledged = async (notificationId: number) => {
-    await $fetch(`${BASE_URL()}/notifications/${notificationId}/acknowledge`, {
+    await $fetch(`${BASE_URL()}/notifications/acknowledge`, {
       headers: { authorization: `Bearer ${authStore.token}` },
+      body: { notification_id: notificationId },
       method: 'POST',
     })
     await getNotifications()
   }
 
   const markAsCompleted = async (notificationId: number) => {
-    await $fetch(`${BASE_URL()}/notifications/${notificationId}/complete`, {
+    await $fetch(`${BASE_URL()}/notifications/complete`, {
       headers: { authorization: `Bearer ${authStore.token}` },
+      body: { notification_id: notificationId },
       method: 'POST',
     })
     await getNotifications()
@@ -80,6 +140,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const markAllAcknowledged = async () => {
     await $fetch(`${BASE_URL()}/notifications/acknowledge-all`, {
       headers: { authorization: `Bearer ${authStore.token}` },
+      body: { user_id: authStore.user?.id },
       method: 'POST',
     })
     await getNotifications()
@@ -89,9 +150,16 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const markAllCompleted = async () => {
     await $fetch(`${BASE_URL()}/notifications/complete-all`, {
       headers: { authorization: `Bearer ${authStore.token}` },
+      body: { user_id: authStore.user?.id },
       method: 'POST',
     })
     await getNotifications()
+  }
+
+  const clearNotifications = () => 
+  {
+    notifications.value = [];
+    unreadCount.value = 0;
   }
 
   return {
@@ -104,8 +172,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
     markAsCompleted,
     markAllAcknowledged,  // @TODO - make another API endpoint for this.
     markAllCompleted,  // @TODO - make another API endpoint for this.
+    clearNotifications,
   }
-
 });
 
     // Demo helper: seed some sample notifications

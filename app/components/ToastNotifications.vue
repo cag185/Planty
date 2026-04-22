@@ -98,22 +98,24 @@ import { AlertTriangle, Info, X } from "lucide-vue-next";
 import { useNotificationsStore } from "~/stores/notifications";
 
 const toast = useToast();
-const store = useNotificationsStore();
+const notificationStore = useNotificationsStore();
+const plantStore = usePlantsStore();
+const authStore = useAuthStore();
 const route = useRoute();
 
 const onAcknowledge = (
-  notificationId: string | undefined,
+  notificationId: number | undefined,
   closeCallback: () => void,
 ) => {
-  if (notificationId) store.acknowledge(notificationId);
+  if (notificationId) notificationStore.markAsAcknowledged(notificationId);
   closeCallback();
 };
 
 const onDismiss = (
-  notificationId: string | undefined,
+  notificationId: number | undefined,
   closeCallback: () => void,
 ) => {
-  if (notificationId) store.dismiss(notificationId);
+  if (notificationId) notificationStore.markAsCompleted(notificationId);
   closeCallback();
 };
 
@@ -132,22 +134,47 @@ watch(
 );
 
 watch(
-  () => store.notifications.length,
+  () => notificationStore.notifications.length,
   (newLen, oldLen) => {
     if (newLen > oldLen && route.path !== "/notifications") {
-      const newest = store.notifications[store.notifications.length - 1];
-      if (newest && !newest.read) {
-        toast.add({
-          group: "notifications",
-          severity: newest.type === "requirement" ? "warn" : "info",
-          summary: newest.title,
-          detail: newest.message,
-          data: {
-            type: newest.type,
-            plantName: newest.plantName,
-            notificationId: newest.id,
-          },
-        });
+      const newCount = newLen - oldLen;
+      const newNotifications = notificationStore.notifications
+        .slice(-newCount)
+        .filter((n) => !n.acknowledged && !n.completed);
+
+      const toShow = newNotifications.slice(0, 3);
+      const remaining = newNotifications.length - toShow.length;
+
+      toShow.forEach((notification, index) => {
+        setTimeout(() => {
+          toast.add({
+            group: "notifications",
+            severity: notification.typeName === "requirement" ? "warn" : "info",
+            summary: notification.title,
+            detail: notification.message,
+            // @ts-expect-error: Allow custom data property for toast message
+            data: {
+              type: notification.typeName,
+              plantName: notification.plantId
+                ? plantStore.getPlantById(notification.plantId.toString())?.name
+                : null,
+              notificationId: notification.id,
+            },
+          });
+        }, index * 500);
+      });
+
+      if (remaining > 0) {
+        setTimeout(() => {
+          toast.add({
+            group: "notifications",
+            severity: "info",
+            summary: `+${remaining} more notification${remaining > 1 ? "s" : ""}`,
+            detail: "View all in your notifications inbox.",
+            // @ts-expect-error: Allow custom data property for toast message
+            data: { type: "summary" },
+          });
+        }, toShow.length * 500);
       }
     }
   },

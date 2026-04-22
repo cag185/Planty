@@ -97,7 +97,7 @@
                       </p> -->
                     </div>
                     <span class="text-xs text-text-tertiary flex-shrink-0">
-                      {{ n.dateCreated }}
+                      {{ formatTime(n.dateCreated) }}
                     </span>
                   </div>
                   <p class="text-sm text-text-secondary mt-1.5">
@@ -162,7 +162,7 @@
                       </p> -->
                     </div>
                     <span class="text-xs text-text-tertiary flex-shrink-0">
-                      {{ n.dateCreated }}
+                      {{ formatTime(n.dateCreated) }}
                     </span>
                   </div>
                   <p class="text-sm text-text-secondary mt-1.5">
@@ -212,4 +212,15 @@ function formatTime(dateStr: string): string {
   if (diffDays === 1) return "Yesterday";
   return `${diffDays}d ago`;
 }
+
+const formatShortDateTime = (dateTime: Date) => {
+  return dateTime.toLocaleString("en-US", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+};
+
+onMounted(() => {
+  notificationStore.getNotifications();
+});
 </script>
