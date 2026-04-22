@@ -114,6 +114,8 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 
+const notificationStore = useNotificationsStore();
+
 function toggleMode() {
   isSignup.value = !isSignup.value;
   error.value = "";
@@ -123,8 +125,15 @@ async function handleSubmit() {
   error.value = "";
 
   if (isSignup.value) {
-    const success = await auth.signup(firstName.value, email.value, password.value);
+    const success = await auth.signup(
+      firstName.value,
+      email.value,
+      password.value,
+    );
     if (success) {
+      // call the notification store getter.
+      await notificationStore.getNotifications();
+
       router.push("/plants");
     } else {
       error.value = "Sign up failed. Please try again.";
