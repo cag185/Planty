@@ -55,13 +55,40 @@ export const useAuthStore = defineStore('auth', {
       sessionStorage.removeItem('planty_token')
       // Clear all user-specific stores
       const plantsStore = usePlantsStore()
+      const notificationsStore = useNotificationsStore()
+      notificationsStore.clearNotifications()
       plantsStore.clearPlants()
+    },
+
+    handleAuthError(error: any) {
+      if (error?.response?.status === 401) {
+        this.logout()
+        navigateTo('/login')
+        return true
+      }
+      return false
     },
 
     restoreSession() {
       const stored = sessionStorage.getItem('planty_user')
       const token = sessionStorage.getItem('planty_token')
       if (stored && token) {
+        try {
+          const tokenParts = token.split('.')
+          const encodedPayload = tokenParts[1]
+          if (tokenParts.length !== 3 || !encodedPayload) {
+            this.logout()
+            return
+          }
+          const payload = JSON.parse(atob(encodedPayload))
+          if (payload.exp * 1000 < Date.now()) {
+            this.logout()
+            return
+          }
+        } catch {
+          this.logout()
+          return
+        }
         this.user = JSON.parse(stored)
         this.token = token
       }

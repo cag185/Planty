@@ -99,15 +99,19 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
     console.log('Fetching notifications for user:', authStore.user?.id);
 
-    const data = await $fetch<ApiNotification[]>(`${BASE_URL()}/notifications/`,
-      {
-        headers: { authorization: `Bearer ${authStore.token}` },
-        method: 'GET',
-        query: { user_id: authStore?.user?.id },
-      })
-      console.log('Fetched notifications:', data);
-    notifications.value = data.map(mapApiNotification).filter((n) => !n.completed);
-    unreadCount.value = notifications.value.filter((n) => !n.acknowledged).length;
+    try {
+      const data = await $fetch<ApiNotification[]>(`${BASE_URL()}/notifications/`,
+        {
+          headers: { authorization: `Bearer ${authStore.token}` },
+          method: 'GET',
+          query: { user_id: authStore?.user?.id },
+        })
+        console.log('Fetched notifications:', data);
+      notifications.value = data.map(mapApiNotification).filter((n) => !n.completed);
+      unreadCount.value = notifications.value.filter((n) => !n.acknowledged).length;
+    } catch (error: any) {
+      if (!authStore.handleAuthError(error)) throw error
+    }
   }
   
   const updateNotifications = computed(() => {
@@ -119,41 +123,57 @@ export const useNotificationsStore = defineStore('notifications', () => {
   });
 
   const markAsAcknowledged = async (notificationId: number) => {
-    await $fetch(`${BASE_URL()}/notifications/acknowledge`, {
-      headers: { authorization: `Bearer ${authStore.token}` },
-      body: { notification_id: notificationId },
-      method: 'POST',
-    })
-    await getNotifications()
+    try {
+      await $fetch(`${BASE_URL()}/notifications/acknowledge`, {
+        headers: { authorization: `Bearer ${authStore.token}` },
+        body: { notification_id: notificationId },
+        method: 'POST',
+      })
+      await getNotifications()
+    } catch (error: any) {
+      if (!authStore.handleAuthError(error)) throw error
+    }
   }
 
   const markAsCompleted = async (notificationId: number) => {
-    await $fetch(`${BASE_URL()}/notifications/complete`, {
-      headers: { authorization: `Bearer ${authStore.token}` },
-      body: { notification_id: notificationId },
-      method: 'POST',
-    })
-    await getNotifications()
+    try {
+      await $fetch(`${BASE_URL()}/notifications/complete`, {
+        headers: { authorization: `Bearer ${authStore.token}` },
+        body: { notification_id: notificationId },
+        method: 'POST',
+      })
+      await getNotifications()
+    } catch (error: any) {
+      if (!authStore.handleAuthError(error)) throw error
+    }
   }
 
   // @TODO - make another API endpoint for this.
   const markAllAcknowledged = async () => {
-    await $fetch(`${BASE_URL()}/notifications/acknowledge-all`, {
-      headers: { authorization: `Bearer ${authStore.token}` },
-      body: { user_id: authStore.user?.id },
-      method: 'POST',
-    })
-    await getNotifications()
+    try {
+      await $fetch(`${BASE_URL()}/notifications/acknowledge-all`, {
+        headers: { authorization: `Bearer ${authStore.token}` },
+        body: { user_id: authStore.user?.id },
+        method: 'POST',
+      })
+      await getNotifications()
+    } catch (error: any) {
+      if (!authStore.handleAuthError(error)) throw error
+    }
   }
 
   // @TODO - make another API endpoint for this.
   const markAllCompleted = async () => {
-    await $fetch(`${BASE_URL()}/notifications/complete-all`, {
-      headers: { authorization: `Bearer ${authStore.token}` },
-      body: { user_id: authStore.user?.id },
-      method: 'POST',
-    })
-    await getNotifications()
+    try {
+      await $fetch(`${BASE_URL()}/notifications/complete-all`, {
+        headers: { authorization: `Bearer ${authStore.token}` },
+        body: { user_id: authStore.user?.id },
+        method: 'POST',
+      })
+      await getNotifications()
+    } catch (error: any) {
+      if (!authStore.handleAuthError(error)) throw error
+    }
   }
 
   const clearNotifications = () => 
