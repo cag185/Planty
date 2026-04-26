@@ -55,6 +55,8 @@ export const useAuthStore = defineStore('auth', {
       sessionStorage.removeItem('planty_token')
       // Clear all user-specific stores
       const plantsStore = usePlantsStore()
+      const notificationsStore = useNotificationsStore()
+      notificationsStore.clearNotifications()
       plantsStore.clearPlants()
     },
 
