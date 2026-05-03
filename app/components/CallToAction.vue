@@ -19,9 +19,8 @@
             Ready to grow together?
           </h2>
           <p class="text-lg text-text-secondary mb-10 max-w-2xl mx-auto">
-            Join thousands of happy plant owners who have automated their indoor
-            gardens. Order today and get free shipping on your first Planty
-            system.
+            Join our growing community of happy plant owners who have automated
+            their indoor gardens
           </p>
           <button
             @click="signUp()"

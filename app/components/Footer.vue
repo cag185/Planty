@@ -23,12 +23,6 @@
               href="#"
               class="text-text-tertiary hover:text-primary-600 transition-colors"
             >
-              <Twitter class="w-5 h-5" />
-            </a>
-            <a
-              href="#"
-              class="text-text-tertiary hover:text-primary-600 transition-colors"
-            >
               <Instagram class="w-5 h-5" />
             </a>
             <a
@@ -70,69 +64,6 @@
                 href="#"
                 class="text-text-secondary hover:text-primary-600 transition-colors"
                 >FAQ</a
-              >
-            </li>
-          </ul>
-        </div>
-
-        <!-- Company -->
-        <div>
-          <h4 class="font-heading font-bold text-text-primary mb-4">Company</h4>
-          <ul class="space-y-3">
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >About Us</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Careers</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Blog</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Contact</a
-              >
-            </li>
-          </ul>
-        </div>
-
-        <!-- Legal -->
-        <div>
-          <h4 class="font-heading font-bold text-text-primary mb-4">Legal</h4>
-          <ul class="space-y-3">
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Privacy Policy</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Terms of Service</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-text-secondary hover:text-primary-600 transition-colors"
-                >Return Policy</a
               >
             </li>
           </ul>

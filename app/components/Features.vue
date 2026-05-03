@@ -11,9 +11,9 @@
           >
         </h2>
         <p class="text-lg text-text-secondary">
-          <span class="text-primary-600 font-medium">Planty</span> uses a
-          combination of advanced sensors and machine learning to create the
-          perfect micro-environment for every species.
+          <span class="text-primary-600 font-medium">Planty</span> uses an array
+          of sensors and an automated care system to create the perfect
+          micro-environment for every species.
         </p>
       </div>
 

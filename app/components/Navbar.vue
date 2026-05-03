@@ -193,6 +193,7 @@ const showUserMenu = ref(false);
 const navLinks = [
   { name: "Features", to: "/#features" },
   { name: "My Plants", to: "/plants" },
+  { name: "Profile", to: "/userSettings" },
 ];
 
 function handleLogout() {

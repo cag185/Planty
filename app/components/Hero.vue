@@ -47,29 +47,6 @@
               Watch Demo
             </button>
           </div>
-
-          <div
-            class="mt-10 flex items-center gap-4 text-sm text-text-secondary"
-          >
-            <div class="flex -space-x-2">
-              <div
-                v-for="i in 4"
-                :key="i"
-                class="w-8 h-8 rounded-full border-2 border-white bg-surface-200 flex items-center justify-center overflow-hidden"
-              >
-                <img
-                  :src="`https://i.pravatar.cc/100?img=${i + 10}`"
-                  alt="User"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            <p>
-              Joined by
-              <span class="font-semibold text-text-primary">10,000+</span>
-              plant lovers
-            </p>
-          </div>
         </div>
 
         <!-- Illustration Area -->
