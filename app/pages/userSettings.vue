@@ -1,29 +1,35 @@
 <template>
   <div class="min-h-screen bg-white">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-      <h1 class="text-3xl font-bold text-text-primary">User Settings</h1>
-      <p class="text-text-secondary mt-2">
-        Manage preferences and account settings
-      </p>
+      <div class="w-3/4 mx-auto">
+        <h1 class="text-3xl font-bold text-text-primary">User Settings</h1>
+        <p class="text-text-secondary mt-2">
+          Manage preferences and account settings
+        </p>
+      </div>
       <!-- Main display div -->
       <div
-        class="text-center flex flex-row text-black min-h-[60vh] mt-10 bg-white rounded-2xl border border-surface-200 shadow-material"
+        class="text-start mx-auto flex flex-col text-black min-h-[60vh] mt-10 bg-slate-50 w-3/4 rounded-2xl border border-surface-200 shadow-material"
       >
         <!-- Information Display -->
         <div
-          class="rounded-lg w-1/2 mx-4 my-4 flex space-y-2 flex-col text-start flex-grow-1"
+          class="rounded-lg w-1/2 pl-4 mx-4 my-8 flex space-y-2 flex-col text-start flex-grow-1"
         >
-          <div class="text-center font-bold text-2xl">User Information</div>
-          <div>Name:</div>
-          <div>Email:</div>
-          <div>Account Creation Date:</div>
+          <div class="text-start font-bold text-2xl">User Information</div>
+          <div class="pl-4">
+            <div>Name:</div>
+            <div>Email:</div>
+            <div>Account Creation Date:</div>
+          </div>
         </div>
         <!-- Actions -->
         <div
-          class="rounded-lg w-1/2 mx-4 my-4 flex space-y-4 flex-col text-center flex-grow-1"
+          class="rounded-lg w-1/2 pl-4 mx-4 my-8 flex space-y-4 flex-col text-start flex-grow-1"
         >
-          <div class="text-center font-bold text-2xl">Settings</div>
-          <div class="flex flex-row text-center space-x-4 w-fit self-center">
+          <div class="text-start font-bold text-2xl">Settings</div>
+          <div
+            class="flex flex-row pl-4 text-center space-x-4 w-fit self-start"
+          >
             <div>Toggle Email Notifications</div>
             <div>
               <button
@@ -38,9 +44,9 @@
               </button>
             </div>
           </div>
-          <div>
+          <div class="pl-4">
             <button
-              class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/3 text-sm text-white font-medium transition-colors shadow-material"
+              class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/2 text-sm text-white font-medium transition-colors shadow-material"
             >
               Delete Account
             </button>
