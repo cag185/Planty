@@ -31,6 +31,7 @@
 
           <!-- Notifications bell -->
           <NuxtLink
+            v-if="isUserLoggerIn"
             to="/notifications"
             class="relative text-text-secondary hover:text-primary-600 transition-colors p-1"
           >
@@ -138,7 +139,7 @@
               {{ notifStore.unreadCount > 9 ? "9+" : notifStore.unreadCount }}
             </span>
           </NuxtLink>
-          <div v-if="auth.isLoggedIn" class="border-t border-surface-200 pt-4">
+          <div v-if="isUserLoggerIn" class="border-t border-surface-200 pt-4">
             <div class="flex items-center gap-3 mb-3">
               <div
                 class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold"
@@ -181,6 +182,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { Leaf, Menu, X, LogOut, Bell } from "lucide-vue-next";
 import { useAuthStore } from "~/stores/auth";
 import { useNotificationsStore } from "~/stores/notifications";
+import { F } from "vue-router/dist/index-BzEKChPW.js";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -190,26 +192,33 @@ const notifStore = useNotificationsStore();
 const isOpen = ref(false);
 const showUserMenu = ref(false);
 
-const navLinks = [
-  { name: "Features", to: "/#features" },
-  { name: "My Plants", to: "/plants" },
-  { name: "Profile", to: "/userSettings" },
-];
+const isUserLoggerIn = computed(() => auth.isLoggedIn);
+const navLinks = computed(() => {
+  if (isUserLoggerIn.value) {
+    return [
+      { name: "My Plants", to: "/plants" },
+      { name: "Profile", to: "/userSettings" },
+      { name: "Features", to: "/#features" },
+    ];
+  } else {
+    return [{ name: "Features", to: "/#features" }];
+  }
+});
 
-function handleLogout() {
+const handleLogout = () => {
   auth.logout();
   showUserMenu.value = false;
   isOpen.value = false;
   plantStore.clearPlants();
   notificationStore.clearNotifications();
   router.push("/");
-}
+};
 
-function closeUserMenu(e: MouseEvent) {
+const closeUserMenu = (e: MouseEvent) => {
   if (!(e.target as HTMLElement).closest(".relative")) {
     showUserMenu.value = false;
   }
-}
+};
 
 onMounted(() => {
   document.addEventListener("click", closeUserMenu);
