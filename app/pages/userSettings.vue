@@ -9,7 +9,7 @@
       </div>
       <!-- Main display div -->
       <div
-        class="text-start mx-auto flex flex-col text-black min-h-[60vh] mt-10 bg-slate-50 w-3/4 rounded-2xl border border-surface-200 shadow-material"
+        class="text-start mx-auto flex flex-col text-black mt-10 bg-slate-50 w-3/4 rounded-2xl border border-surface-200 shadow-material"
       >
         <!-- Information Display -->
         <div
@@ -17,14 +17,25 @@
         >
           <div class="text-start font-bold text-2xl">User Information</div>
           <div class="pl-4">
-            <div>Name:</div>
-            <div>Email:</div>
-            <div>Account Creation Date:</div>
+            <div>
+              Name:
+              <span :class="userInfoClasses">{{ user?.name }}</span>
+            </div>
+            <div>
+              Email:
+              <span :class="userInfoClasses">{{ user?.email }}</span>
+            </div>
+            <div>
+              Account Creation Date:
+              <span :class="userInfoClasses">{{
+                user?.dateCreated ?? "n/a"
+              }}</span>
+            </div>
           </div>
         </div>
         <!-- Actions -->
         <div
-          class="rounded-lg w-1/2 pl-4 mx-4 my-8 flex space-y-4 flex-col text-start flex-grow-1"
+          class="rounded-lg pl-4 mx-4 my-8 flex space-y-4 flex-col text-start flex-grow-1"
         >
           <div class="text-start font-bold text-2xl">Settings</div>
           <div
@@ -44,9 +55,9 @@
               </button>
             </div>
           </div>
-          <div class="pl-4">
+          <div class="pl-4 pt-8 justify-center flex">
             <button
-              class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/2 text-sm text-white font-medium transition-colors shadow-material"
+              class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
             >
               Delete Account
             </button>
@@ -58,4 +69,8 @@
 </template>
 <script setup lang="ts">
 const useEmailAddress = ref(false);
+
+const user = computed(() => useAuthStore().user);
+// const AccountCreationDate = user?.dateCreated
+const userInfoClasses = "pl-2 font-semibold text-primary-900";
 </script>
