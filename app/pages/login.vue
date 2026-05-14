@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen bg-white flex items-center justify-center px-4">
-    <div class="w-full max-w-md">
+  <div class="min-h-screen bg-white px-4 pt-32 pb-16">
+    <div class="w-full max-w-md mx-auto">
       <!-- Logo -->
       <div class="flex items-center justify-center gap-2 mb-8">
         <div class="bg-primary-50 p-2 rounded-lg text-primary-600">
