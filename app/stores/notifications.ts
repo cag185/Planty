@@ -135,11 +135,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
   }
 
-  const markAsCompleted = async (notificationId: number) => {
+  const markAsCompleted = async (notificationId: number, isForWatering: boolean = false, plantId?: number) => {
     try {
       await $fetch(`${BASE_URL()}/notifications/complete`, {
         headers: { authorization: `Bearer ${authStore.token}` },
-        body: { notification_id: notificationId },
+        body: { 
+          notification_id: notificationId,
+          isForWatering: isForWatering,
+          plant_id: plantId, 
+         },
         method: 'POST',
       })
       await getNotifications()

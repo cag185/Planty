@@ -106,7 +106,9 @@
                   <div class="flex gap-2 mt-3">
                     <button
                       v-if="!n.completed"
-                      @click="notificationStore.markAsCompleted(n.id)"
+                      @click="
+                        notificationStore.markAsCompleted(n.id, true, n.plantId)
+                      "
                       class="text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 px-3 py-1.5 rounded-lg transition-colors"
                     >
                       Mark as completed
