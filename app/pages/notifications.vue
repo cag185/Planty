@@ -109,13 +109,13 @@
                       @click="notificationStore.markAsCompleted(n.id)"
                       class="text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      Mark as done
+                      Mark as completed
                     </button>
                     <button
                       @click="notificationStore.markAsAcknowledged(n.id)"
                       class="text-xs font-medium text-text-tertiary hover:text-red-500 px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      Dismiss
+                      Acknowledge
                     </button>
                   </div>
                 </div>
