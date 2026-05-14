@@ -182,7 +182,6 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { Leaf, Menu, X, LogOut, Bell } from "lucide-vue-next";
 import { useAuthStore } from "~/stores/auth";
 import { useNotificationsStore } from "~/stores/notifications";
-import { F } from "vue-router/dist/index-BzEKChPW.js";
 
 const router = useRouter();
 const auth = useAuthStore();
