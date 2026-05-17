@@ -139,7 +139,7 @@ watch(
     if (newLen > oldLen && route.path !== "/notifications") {
       const newCount = newLen - oldLen;
       const newNotifications = notificationStore.notifications
-        .slice(-newCount)
+        .slice(0, newCount)
         .filter((n) => !n.acknowledged && !n.completed);
 
       const toShow = newNotifications.slice(0, 3);
