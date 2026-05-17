@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
+import { useSocket } from '~/composables/useSocket'
 
 // Map the ids to the type.
 export type NotificationType = Record<number, string>
@@ -186,6 +187,30 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unreadCount.value = 0;
   }
 
+  // --- Socket.io real-time notifications ---
+  const { connect, disconnect, onEvent, offEvent } = useSocket()
+
+  const handleNewNotification = (raw: ApiNotification) => {
+    const mapped = mapApiNotification(raw)
+    // Only add non-completed notifications (matching existing filter logic)
+    if (!mapped.completed) {
+      notifications.value.unshift(mapped)
+      if (!mapped.acknowledged) {
+        unreadCount.value++
+      }
+    }
+  }
+
+  const connectSocket = () => {
+    connect()
+    onEvent<ApiNotification>('notification:new', handleNewNotification)
+  }
+
+  const disconnectSocket = () => {
+    offEvent('notification:new', handleNewNotification as (...args: unknown[]) => void)
+    disconnect()
+  }
+
   return {
     notifications,
     unreadCount,
@@ -194,9 +219,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
     getNotifications,
     markAsAcknowledged,
     markAsCompleted,
-    markAllAcknowledged,  // @TODO - make another API endpoint for this.
-    markAllCompleted,  // @TODO - make another API endpoint for this.
+    markAllAcknowledged,
+    markAllCompleted,
     clearNotifications,
+    connectSocket,
+    disconnectSocket,
   }
 });
 
