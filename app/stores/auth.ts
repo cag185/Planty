@@ -29,6 +29,9 @@ export const useAuthStore = defineStore('auth', {
         this.token = response.token
         sessionStorage.setItem('planty_user', JSON.stringify(response.user))
         sessionStorage.setItem('planty_token', response.token)
+        // Connect socket for real-time notifications
+        const notificationsStore = useNotificationsStore()
+        notificationsStore.connectSocket()
         return true
       } catch {
         return false
@@ -56,6 +59,7 @@ export const useAuthStore = defineStore('auth', {
       // Clear all user-specific stores
       const plantsStore = usePlantsStore()
       const notificationsStore = useNotificationsStore()
+      notificationsStore.disconnectSocket()
       notificationsStore.clearNotifications()
       plantsStore.clearPlants()
     },
@@ -91,6 +95,9 @@ export const useAuthStore = defineStore('auth', {
         }
         this.user = JSON.parse(stored)
         this.token = token
+        // Reconnect socket for real-time notifications
+        const notificationsStore = useNotificationsStore()
+        notificationsStore.connectSocket()
       }
     },
   },

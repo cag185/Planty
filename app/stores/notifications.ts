@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
+import { useSocket } from '~/composables/useSocket'
 
 // Map the ids to the type.
 export type NotificationType = Record<number, string>
@@ -135,11 +136,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     }
   }
 
-  const markAsCompleted = async (notificationId: number) => {
+  const markAsCompleted = async (notificationId: number, isForWatering: boolean = false, plantId?: number) => {
     try {
       await $fetch(`${BASE_URL()}/notifications/complete`, {
         headers: { authorization: `Bearer ${authStore.token}` },
-        body: { notification_id: notificationId },
+        body: { 
+          notification_id: notificationId,
+          isForWatering: isForWatering,
+          plant_id: plantId, 
+         },
         method: 'POST',
       })
       await getNotifications()
@@ -182,6 +187,30 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unreadCount.value = 0;
   }
 
+  // --- Socket.io real-time notifications ---
+  const { connect, disconnect, onEvent, offEvent } = useSocket()
+
+  const handleNewNotification = (raw: ApiNotification) => {
+    const mapped = mapApiNotification(raw)
+    // Only add non-completed notifications (matching existing filter logic)
+    if (!mapped.completed) {
+      notifications.value.unshift(mapped)
+      if (!mapped.acknowledged) {
+        unreadCount.value++
+      }
+    }
+  }
+
+  const connectSocket = () => {
+    connect()
+    onEvent<ApiNotification>('notification:new', handleNewNotification)
+  }
+
+  const disconnectSocket = () => {
+    offEvent('notification:new', handleNewNotification as (...args: unknown[]) => void)
+    disconnect()
+  }
+
   return {
     notifications,
     unreadCount,
@@ -190,9 +219,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
     getNotifications,
     markAsAcknowledged,
     markAsCompleted,
-    markAllAcknowledged,  // @TODO - make another API endpoint for this.
-    markAllCompleted,  // @TODO - make another API endpoint for this.
+    markAllAcknowledged,
+    markAllCompleted,
     clearNotifications,
+    connectSocket,
+    disconnectSocket,
   }
 });
 
