@@ -28,7 +28,7 @@
             <div>
               Account Creation Date:
               <span :class="userInfoClasses">{{
-                user?.dateCreated ?? "n/a"
+                shortenDate(user?.dateCreated ?? new Date())
               }}</span>
             </div>
           </div>
@@ -55,7 +55,15 @@
               </button>
             </div>
           </div>
-          <div class="pl-4 pt-8 justify-center flex">
+          <div
+            class="pl-4 pt-8 lg:pt-16 justify-center flex items-end space-x-32"
+          >
+            <button
+              class="bg-primary-500 hover:bg-primary-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
+              @click="saveChanges"
+            >
+              Save Changes
+            </button>
             <button
               class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
             >
@@ -68,9 +76,46 @@
   </div>
 </template>
 <script setup lang="ts">
+import { email } from "zod";
+
 const useEmailAddress = ref(false);
 
 const user = computed(() => useAuthStore().user);
-// const AccountCreationDate = user?.dateCreated
-const userInfoClasses = "pl-2 font-semibold text-primary-900";
+const userInfoClasses = "pl-2 font-semibold text-primary-700";
+
+const shortenDate = (date: Date) => {
+  return date.toLocaleString(undefined, {
+    dateStyle: "short",
+  });
+};
+
+// As we develop more user settings, add them to the form and update from there.
+const formState = ref({
+  emailNotificationsEnabled: user.value?.emailNotificationsEnabled,
+  name: user.value?.name,
+  email: user.value?.email,
+});
+
+const saveChanges = async () => {
+  // Check to see if any settings have changed before making the API call.
+  if (
+    formState.value.emailNotificationsEnabled ===
+    user.value?.emailNotificationsEnabled
+  ) {
+    // No changes, so just return early.
+    return;
+  }
+  try {
+    // Make an API call to update the settings (currently just email preferences).
+    await $fetch("/api/user/updateSettings", {
+      method: "POST",
+      body: {
+        emailNotificationsEnabled: useEmailAddress.value,
+        // Add other settings here as needed
+      },
+    });
+  } catch (error) {
+    console.error("Error saving changes:", error);
+  }
+};
 </script>

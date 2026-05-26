@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
+import { map } from 'zod'
 
 export interface User {
   id: number
   name: string
   email: string
+  dateCreated: Date
+  emailNotificationsEnabled: boolean
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -25,9 +28,9 @@ export const useAuthStore = defineStore('auth', {
           method: 'POST',
           body: { email, password },
         })
-        this.user = response.user
+        this.user = this.mapApiUserToStoreUser(response.user)
         this.token = response.token
-        sessionStorage.setItem('planty_user', JSON.stringify(response.user))
+        sessionStorage.setItem('planty_user', JSON.stringify(this.user))
         sessionStorage.setItem('planty_token', response.token)
         // Connect socket for real-time notifications
         const notificationsStore = useNotificationsStore()
@@ -41,11 +44,18 @@ export const useAuthStore = defineStore('auth', {
     async signup(name: string, email: string, password: string): Promise<boolean> {
       try {
         const { apiBaseUrl } = useRuntimeConfig().public
-        await $fetch(`${apiBaseUrl}/users/`, {
+        const response = await $fetch<{ token: string; user: User }>(`${apiBaseUrl}/users/`, {
           method: 'POST',
           body: { name, email, password },
         })
-        return await this.login(email, password)
+        this.user = this.mapApiUserToStoreUser(response.user)
+        this.token = response.token
+        sessionStorage.setItem('planty_user', JSON.stringify(this.user))
+        sessionStorage.setItem('planty_token', response.token)
+        // Connect socket for real-time notifications
+        const notificationsStore = useNotificationsStore()
+        notificationsStore.connectSocket()
+        return true
       } catch {
         return false
       }
@@ -98,6 +108,16 @@ export const useAuthStore = defineStore('auth', {
         // Reconnect socket for real-time notifications
         const notificationsStore = useNotificationsStore()
         notificationsStore.connectSocket()
+      }
+    },
+
+    mapApiUserToStoreUser(apiUser: any): User {
+      return {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        dateCreated: new Date(apiUser.dateCreated),
+        emailNotificationsEnabled: apiUser.emailNotificationsEnabled ?? false,
       }
     },
   },
