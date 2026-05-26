@@ -44,13 +44,21 @@
             <div>Toggle Email Notifications</div>
             <div>
               <button
-                @click="useEmailAddress = !useEmailAddress"
+                @click="toggleEmailNotifications"
                 class="relative w-11 h-6 rounded-full transition-colors duration-200"
-                :class="useEmailAddress ? 'bg-primary-500' : 'bg-red-200'"
+                :class="
+                  formState.emailNotificationsEnabled
+                    ? 'bg-primary-500'
+                    : 'bg-red-200'
+                "
               >
                 <span
                   class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
-                  :class="useEmailAddress ? 'translate-x-5' : 'translate-x-0'"
+                  :class="
+                    formState.emailNotificationsEnabled
+                      ? 'translate-x-5'
+                      : 'translate-x-0'
+                  "
                 ></span>
               </button>
             </div>
@@ -61,6 +69,7 @@
             <button
               class="bg-primary-500 hover:bg-primary-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
               @click="saveChanges"
+              :disabled="!canSaveChanges"
             >
               Save Changes
             </button>
@@ -76,11 +85,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { email } from "zod";
-
-const useEmailAddress = ref(false);
-
-const user = computed(() => useAuthStore().user);
+const authStore = useAuthStore();
+const user = computed(() => authStore.user);
 const userInfoClasses = "pl-2 font-semibold text-primary-700";
 
 const shortenDate = (date: Date) => {
@@ -90,28 +96,32 @@ const shortenDate = (date: Date) => {
 };
 
 // As we develop more user settings, add them to the form and update from there.
+// Seeded from the auth store so the toggle reflects the current saved state on load.
 const formState = ref({
-  emailNotificationsEnabled: user.value?.emailNotificationsEnabled,
+  emailNotificationsEnabled: user.value?.emailNotificationsEnabled ?? false,
   name: user.value?.name,
   email: user.value?.email,
 });
 
+const canSaveChanges = computed(() => {
+  return (
+    formState.value.emailNotificationsEnabled !==
+    (user.value?.emailNotificationsEnabled ?? false)
+  );
+});
+
+const toggleEmailNotifications = () => {
+  formState.value.emailNotificationsEnabled =
+    !formState.value.emailNotificationsEnabled;
+};
+
 const saveChanges = async () => {
-  // Check to see if any settings have changed before making the API call.
-  if (
-    formState.value.emailNotificationsEnabled ===
-    user.value?.emailNotificationsEnabled
-  ) {
-    // No changes, so just return early.
-    return;
-  }
+  if (!canSaveChanges.value) return;
   try {
-    // Make an API call to update the settings (currently just email preferences).
     await $fetch("/api/user/updateSettings", {
       method: "POST",
       body: {
-        emailNotificationsEnabled: useEmailAddress.value,
-        // Add other settings here as needed
+        emailNotificationsEnabled: formState.value.emailNotificationsEnabled,
       },
     });
   } catch (error) {
