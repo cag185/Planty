@@ -26,12 +26,12 @@
           }}
         </p>
 
-        <!-- Error -->
+        <!-- Server error -->
         <div
-          v-if="error"
+          v-if="serverError"
           class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100"
         >
-          {{ error }}
+          {{ serverError }}
         </div>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -43,10 +43,19 @@
             <input
               v-model="firstName"
               type="text"
-              required
               placeholder="e.g. Alex"
-              class="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              @blur="validateField('firstName')"
+              @input="clearFieldError('firstName')"
+              class="w-full px-4 py-2.5 rounded-xl border bg-surface-50 text-text-primary border-black placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:border-transparent transition"
+              :class="
+                fieldErrors.firstName
+                  ? 'border-red-400 focus:ring-red-400'
+                  : 'border-surface-200 focus:ring-primary-500'
+              "
             />
+            <p v-if="fieldErrors.firstName" class="text-red-500 text-xs mt-1.5">
+              {{ fieldErrors.firstName }}
+            </p>
           </div>
 
           <!-- Email -->
@@ -56,11 +65,20 @@
             </label>
             <input
               v-model="email"
-              type="email"
-              required
+              type="text"
               placeholder="you@example.com"
-              class="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              @blur="validateField('email')"
+              @input="clearFieldError('email')"
+              class="w-full px-4 py-2.5 rounded-xl border bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:border-transparent transition"
+              :class="
+                fieldErrors.email
+                  ? 'border-red-400 focus:ring-red-400'
+                  : 'border-surface-200 focus:ring-primary-500'
+              "
             />
+            <p v-if="fieldErrors.email" class="text-red-500 text-xs mt-1.5">
+              {{ fieldErrors.email }}
+            </p>
           </div>
 
           <!-- Password -->
@@ -71,11 +89,19 @@
             <input
               v-model="password"
               type="password"
-              required
-              minlength="6"
               placeholder="At least 6 characters"
-              class="w-full px-4 py-2.5 rounded-xl border border-surface-200 bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+              @blur="validateField('password')"
+              @input="clearFieldError('password')"
+              class="w-full px-4 py-2.5 rounded-xl border bg-surface-50 text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:border-transparent transition"
+              :class="
+                fieldErrors.password
+                  ? 'border-red-400 focus:ring-red-400'
+                  : 'border-surface-200 focus:ring-primary-500'
+              "
             />
+            <p v-if="fieldErrors.password" class="text-red-500 text-xs mt-1.5">
+              {{ fieldErrors.password }}
+            </p>
           </div>
 
           <button
@@ -102,45 +128,106 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { z } from "zod";
 import { Leaf } from "lucide-vue-next";
 import { useAuthStore } from "~/stores/auth";
-
 import { validateEmail, validateCommonEmailProvider } from "~/utils/email";
 
 const router = useRouter();
 const auth = useAuthStore();
+const notificationStore = useNotificationsStore();
 
 const isSignup = ref(false);
 const firstName = ref("");
 const email = ref("");
 const password = ref("");
-const error = ref("");
+const serverError = ref("");
 
-const notificationStore = useNotificationsStore();
+// --- Zod schemas ---
+const emailField = z
+  .string()
+  .min(1, "Email is required")
+  .refine(validateEmail, "Email address is not valid")
+  .refine(
+    validateCommonEmailProvider,
+    "Email must be from a common provider (e.g. Gmail, Yahoo, Outlook)",
+  );
+
+const passwordField = z
+  .string()
+  .min(1, "Password is required")
+  .min(6, "Password must be at least 6 characters");
+
+const loginSchema = z.object({
+  email: emailField,
+  password: passwordField,
+});
+
+const signupSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  email: emailField,
+  password: passwordField,
+});
+
+// --- Per-field error state ---
+const fieldErrors = ref<Record<string, string>>({});
+
+const clearFieldError = (field: string) => {
+  fieldErrors.value = Object.fromEntries(
+    Object.entries(fieldErrors.value).filter(([k]) => k !== field),
+  );
+};
+
+const validateField = (field: string) => {
+  const schema =
+    field === "firstName"
+      ? z.object({ firstName: signupSchema.shape.firstName })
+      : field === "email"
+        ? z.object({ email: emailField })
+        : z.object({ password: passwordField });
+
+  const value =
+    field === "firstName"
+      ? { firstName: firstName.value }
+      : field === "email"
+        ? { email: email.value }
+        : { password: password.value };
+
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    const errs = result.error.flatten().fieldErrors;
+    fieldErrors.value[field] = errs[field as keyof typeof errs]?.[0] ?? "";
+  } else {
+    delete fieldErrors.value[field];
+  }
+};
+
+// ---
 
 function toggleMode() {
   isSignup.value = !isSignup.value;
-  error.value = "";
+  serverError.value = "";
+  Object.keys(fieldErrors.value).forEach((k) => delete fieldErrors.value[k]);
 }
 
 async function handleSubmit() {
-  error.value = "";
+  serverError.value = "";
 
   if (isSignup.value) {
-    // Check first to see if the front end validation is working before making the API call.
-    if (!firstName.value || !email.value || !password.value) {
-      error.value = "Please fill in all fields.";
-      return;
-    }
+    const result = signupSchema.safeParse({
+      firstName: firstName.value,
+      email: email.value,
+      password: password.value,
+    });
 
-    if (!validateEmail(email.value)) {
-      error.value = "Email address is not valid.";
-      return;
-    }
-
-    if (!validateCommonEmailProvider(email.value)) {
-      error.value =
-        "Email address must be from a common provider (e.g., Gmail, Yahoo, Outlook).";
+    if (!result.success) {
+      const errs = result.error.flatten().fieldErrors;
+      Object.keys(fieldErrors.value).forEach(
+        (k) => delete fieldErrors.value[k],
+      );
+      if (errs.firstName?.[0]) fieldErrors.value.firstName = errs.firstName[0];
+      if (errs.email?.[0]) fieldErrors.value.email = errs.email[0];
+      if (errs.password?.[0]) fieldErrors.value.password = errs.password[0];
       return;
     }
 
@@ -150,19 +237,32 @@ async function handleSubmit() {
       password.value,
     );
     if (success) {
-      // call the notification store getter.
       await notificationStore.getNotifications();
-
       router.push("/plants");
     } else {
-      error.value = "Sign up failed. Please try again.";
+      serverError.value = "Sign up failed. Please try again.";
     }
   } else {
+    const result = loginSchema.safeParse({
+      email: email.value,
+      password: password.value,
+    });
+
+    if (!result.success) {
+      const errs = result.error.flatten().fieldErrors;
+      Object.keys(fieldErrors.value).forEach(
+        (k) => delete fieldErrors.value[k],
+      );
+      if (errs.email?.[0]) fieldErrors.value.email = errs.email[0];
+      if (errs.password?.[0]) fieldErrors.value.password = errs.password[0];
+      return;
+    }
+
     const success = await auth.login(email.value, password.value);
     if (success) {
       router.push("/plants");
     } else {
-      error.value = "Invalid email or password.";
+      serverError.value = "Invalid email or password.";
     }
   }
 }
