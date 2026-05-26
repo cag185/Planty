@@ -105,6 +105,8 @@ import { ref } from "vue";
 import { Leaf } from "lucide-vue-next";
 import { useAuthStore } from "~/stores/auth";
 
+import { validateEmail, validateCommonEmailProvider } from "~/utils/email";
+
 const router = useRouter();
 const auth = useAuthStore();
 
@@ -125,6 +127,23 @@ async function handleSubmit() {
   error.value = "";
 
   if (isSignup.value) {
+    // Check first to see if the front end validation is working before making the API call.
+    if (!firstName.value || !email.value || !password.value) {
+      error.value = "Please fill in all fields.";
+      return;
+    }
+
+    if (!validateEmail(email.value)) {
+      error.value = "Email address is not valid.";
+      return;
+    }
+
+    if (!validateCommonEmailProvider(email.value)) {
+      error.value =
+        "Email address must be from a common provider (e.g., Gmail, Yahoo, Outlook).";
+      return;
+    }
+
     const success = await auth.signup(
       firstName.value,
       email.value,
