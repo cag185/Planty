@@ -87,7 +87,7 @@
 <script setup lang="ts">
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
-const dateCreated = computed(() => user.value?.dateCreated).value;
+const dateCreated = computed(() => user.value?.dateCreated);
 const userInfoClasses = "pl-2 font-semibold text-primary-700";
 
 const shortenDate = (date: Date) => {
@@ -99,7 +99,7 @@ const shortenDate = (date: Date) => {
 // As we develop more user settings, add them to the form and update from there.
 // Seeded from the auth store so the toggle reflects the current saved state on load.
 const formState = ref({
-  emailNotificationsEnabled: user.value?.emailNotificationsEnabled ?? false,
+  emailNotificationsEnabled: user.value?.emailNotificationsEnabled || false,
   name: user.value?.name,
   email: user.value?.email,
 });
@@ -119,12 +119,7 @@ const toggleEmailNotifications = () => {
 const saveChanges = async () => {
   if (!canSaveChanges.value) return;
   try {
-    await $fetch("/api/user/updateSettings", {
-      method: "POST",
-      body: {
-        emailNotificationsEnabled: formState.value.emailNotificationsEnabled,
-      },
-    });
+    await authStore.updateSettings(formState.value.emailNotificationsEnabled);
   } catch (error) {
     console.error("Error saving changes:", error);
   }
@@ -132,4 +127,14 @@ const saveChanges = async () => {
 onMounted(() => {
   console.log(user.value);
 });
+
+watch(
+  user,
+  () => {
+    // When the user data is loaded, we need to reseed the form state to reflect the current settings.
+    formState.value.emailNotificationsEnabled =
+      user.value?.emailNotificationsEnabled || false;
+  },
+  { immediate: true },
+);
 </script>
