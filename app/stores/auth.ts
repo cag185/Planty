@@ -86,7 +86,6 @@ export const useAuthStore = defineStore('auth', {
         })
         this.user = this.mapApiUserToStoreUser(response.user)
         sessionStorage.setItem('planty_user', JSON.stringify(this.user))
-        console.log('User settings in the cache: ', sessionStorage.getItem('planty_user'))
         return true
       } catch {
         return false
@@ -166,7 +165,6 @@ export const useAuthStore = defineStore('auth', {
         dateDeleted: apiUser.date_deleted ? new Date(apiUser.date_deleted) : null,
         emailNotificationsEnabled: apiUser.enabled_email_notifications ?? false,
       }
-      console.log('Mapped API user to store user:', frontEndUser);
       return frontEndUser
     },
   },

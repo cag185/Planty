@@ -124,9 +124,6 @@ const saveChanges = async () => {
     console.error("Error saving changes:", error);
   }
 };
-onMounted(() => {
-  console.log(user.value);
-});
 
 watch(
   user,
