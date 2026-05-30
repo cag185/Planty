@@ -4,6 +4,20 @@ export interface User {
   id: number
   name: string
   email: string
+  dateCreated: Date
+  emailNotificationsEnabled: boolean
+  dateDeleted: Date | null
+  dateUpdated: Date
+}
+
+type ApiUser = {
+  id: number
+  name: string
+  email: string
+  date_created: string
+  date_deleted: string | null
+  date_updated: string
+  enabled_email_notifications: boolean
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -21,13 +35,13 @@ export const useAuthStore = defineStore('auth', {
     async login(email: string, password: string): Promise<boolean> {
       try {
         const { apiBaseUrl } = useRuntimeConfig().public
-        const response = await $fetch<{ token: string; user: User }>(`${apiBaseUrl}/users/login`, {
+        const response = await $fetch<{ token: string; user: ApiUser }>(`${apiBaseUrl}/users/login`, {
           method: 'POST',
           body: { email, password },
         })
-        this.user = response.user
+        this.user = this.mapApiUserToStoreUser(response.user)
         this.token = response.token
-        sessionStorage.setItem('planty_user', JSON.stringify(response.user))
+        sessionStorage.setItem('planty_user', JSON.stringify(this.user))
         sessionStorage.setItem('planty_token', response.token)
         // Connect socket for real-time notifications
         const notificationsStore = useNotificationsStore()
@@ -41,11 +55,38 @@ export const useAuthStore = defineStore('auth', {
     async signup(name: string, email: string, password: string): Promise<boolean> {
       try {
         const { apiBaseUrl } = useRuntimeConfig().public
-        await $fetch(`${apiBaseUrl}/users/`, {
+        const response = await $fetch<{ token: string; user: ApiUser }>(`${apiBaseUrl}/users/`, {
           method: 'POST',
           body: { name, email, password },
         })
-        return await this.login(email, password)
+        this.user = this.mapApiUserToStoreUser(response.user)
+        this.token = response.token
+        sessionStorage.setItem('planty_user', JSON.stringify(this.user))
+        sessionStorage.setItem('planty_token', response.token)
+        // Connect socket for real-time notifications
+        const notificationsStore = useNotificationsStore()
+        notificationsStore.connectSocket()
+        return true
+      } catch {
+        return false
+      }
+    },
+
+    async updateSettings(emailNotificationsEnabled: boolean): Promise<boolean> {
+      try {
+        const {apiBaseUrl } = useRuntimeConfig().public
+        const response = await $fetch<{ token: string, user: ApiUser }>(`${apiBaseUrl}/users/${this.user?.id}/update-settings`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+          body: {
+            emailNotificationsEnabled: emailNotificationsEnabled,
+          },
+        })
+        this.user = this.mapApiUserToStoreUser(response.user)
+        sessionStorage.setItem('planty_user', JSON.stringify(this.user))
+        return true
       } catch {
         return false
       }
@@ -93,12 +134,38 @@ export const useAuthStore = defineStore('auth', {
           this.logout()
           return
         }
-        this.user = JSON.parse(stored)
+        // Reconstruct the user data by running it back through the mapping function to ensure date fields are properly converted to Date objects and all expected fields are present.
+        this.user = this.mapParsedJsonToFrontEndUser(JSON.parse(stored))
         this.token = token
         // Reconnect socket for real-time notifications
         const notificationsStore = useNotificationsStore()
         notificationsStore.connectSocket()
       }
+    },
+
+    mapParsedJsonToFrontEndUser(parsedUser: Partial<User>): User {
+      return {
+        id: parsedUser.id ?? 0,
+        name: parsedUser.name ?? '',
+        email: parsedUser.email ?? '',
+        dateCreated: parsedUser.dateCreated ? new Date(parsedUser.dateCreated) : new Date(),
+        dateUpdated: parsedUser.dateUpdated ? new Date(parsedUser.dateUpdated) : new Date(),
+        dateDeleted: parsedUser.dateDeleted ? new Date(parsedUser.dateDeleted) : null,
+        emailNotificationsEnabled: parsedUser.emailNotificationsEnabled ?? false,
+      }
+    },
+
+    mapApiUserToStoreUser(apiUser: ApiUser): User {
+      const frontEndUser: User = {
+        id: apiUser.id,
+        name: apiUser.name,
+        email: apiUser.email,
+        dateCreated: new Date(apiUser.date_created),
+        dateUpdated: new Date(apiUser.date_updated),
+        dateDeleted: apiUser.date_deleted ? new Date(apiUser.date_deleted) : null,
+        emailNotificationsEnabled: apiUser.enabled_email_notifications ?? false,
+      }
+      return frontEndUser
     },
   },
 })
