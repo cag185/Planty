@@ -25,10 +25,10 @@
               Email:
               <span :class="userInfoClasses">{{ user?.email }}</span>
             </div>
-            <div>
+            <div v-if="dateCreated">
               Account Creation Date:
               <span :class="userInfoClasses">{{
-                shortenDate(user?.dateCreated ?? new Date())
+                shortenDate(dateCreated)
               }}</span>
             </div>
           </div>
@@ -87,6 +87,7 @@
 <script setup lang="ts">
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
+const dateCreated = computed(() => user.value?.dateCreated).value;
 const userInfoClasses = "pl-2 font-semibold text-primary-700";
 
 const shortenDate = (date: Date) => {
@@ -128,4 +129,7 @@ const saveChanges = async () => {
     console.error("Error saving changes:", error);
   }
 };
+onMounted(() => {
+  console.log(user.value);
+});
 </script>

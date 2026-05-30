@@ -112,13 +112,14 @@ export const useAuthStore = defineStore('auth', {
     },
 
     mapApiUserToStoreUser(apiUser: any): User {
-      return {
+      const frontEndUser: User = {
         id: apiUser.id,
         name: apiUser.name,
         email: apiUser.email,
-        dateCreated: new Date(apiUser.dateCreated),
+        dateCreated: new Date(apiUser.date_created),
         emailNotificationsEnabled: apiUser.emailNotificationsEnabled ?? false,
       }
+      return frontEndUser
     },
   },
 })
