@@ -163,7 +163,7 @@ export const useAuthStore = defineStore('auth', {
         dateCreated: new Date(apiUser.date_created),
         dateUpdated: new Date(apiUser.date_updated),
         dateDeleted: apiUser.date_deleted ? new Date(apiUser.date_deleted) : null,
-        emailNotificationsEnabled: apiUser.enabled_email_notifications ?? false,
+        emailNotificationsEnabled: !!apiUser.enabled_email_notifications,
       }
       return frontEndUser
     },

@@ -5,6 +5,7 @@
     <Navbar />
     <NuxtPage />
     <ToastNotifications />
+    <GenericToastNotifications ref="genericToast" :timeout="3000" />
   </div>
 </template>
 
