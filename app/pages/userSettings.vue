@@ -12,6 +12,9 @@
         class="text-start mx-auto flex flex-col text-black mt-10 bg-slate-50 w-3/4 rounded-2xl border border-surface-200 shadow-material"
       >
         <!-- Information Display -->
+        <div v-if="loading" class="my-4 pt-8 flex justify-center">
+          <WrappedLoadingIndicator :loading="loading" />
+        </div>
         <div
           class="rounded-lg w-1/2 pl-4 mx-4 my-8 flex space-y-2 flex-col text-start flex-grow-1"
         >
@@ -66,26 +69,29 @@
           <div
             class="pl-4 pt-8 lg:pt-16 justify-center flex items-end space-x-32"
           >
-            <button
-              class="bg-primary-500 hover:bg-primary-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
+            <WrappedButton
+              label="Save Changes"
+              class="w-1/4"
               @click="saveChanges"
               :disabled="!canSaveChanges"
-            >
-              Save Changes
-            </button>
-            <button
-              class="bg-red-500 hover:bg-red-700 rounded-full px-6 py-3 w-1/4 text-sm text-white font-medium transition-colors shadow-material"
-            >
-              Delete Account
-            </button>
+            />
+            <WrappedButton
+              variant="danger"
+              label="Delete Account"
+              class="w-1/4"
+            />
           </div>
         </div>
+        <!-- </WrappedLoadingIndicator> -->
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { useToast } from "primevue/usetoast";
+
 const authStore = useAuthStore();
+const toast = useToast();
 const user = computed(() => authStore.user);
 const dateCreated = computed(() => user.value?.dateCreated);
 const userInfoClasses = "pl-2 font-semibold text-primary-700";
@@ -96,19 +102,24 @@ const shortenDate = (date: Date) => {
   });
 };
 
+const loading = ref(false);
+
 // As we develop more user settings, add them to the form and update from there.
 // Seeded from the auth store so the toggle reflects the current saved state on load.
 const formState = ref({
-  emailNotificationsEnabled: user.value?.emailNotificationsEnabled || false,
+  emailNotificationsEnabled: !!user.value?.emailNotificationsEnabled,
   name: user.value?.name,
   email: user.value?.email,
 });
 
 const canSaveChanges = computed(() => {
-  return (
-    formState.value.emailNotificationsEnabled !==
-    (user.value?.emailNotificationsEnabled ?? false)
-  );
+  if (
+    !!formState.value.emailNotificationsEnabled !==
+    !!user.value?.emailNotificationsEnabled
+  ) {
+    return true;
+  }
+  return false;
 });
 
 const toggleEmailNotifications = () => {
@@ -118,10 +129,20 @@ const toggleEmailNotifications = () => {
 
 const saveChanges = async () => {
   if (!canSaveChanges.value) return;
+  loading.value = true;
   try {
     await authStore.updateSettings(formState.value.emailNotificationsEnabled);
   } catch (error) {
     console.error("Error saving changes:", error);
+  } finally {
+    loading.value = false;
+    toast.add({
+      group: "generic",
+      severity: "success",
+      summary: "Settings saved successfully",
+      detail: "Changes to the user settings have been saved.",
+      life: 3000,
+    });
   }
 };
 
