@@ -6,18 +6,17 @@ export interface PlantStats {
   temperature: number
   soilMoisture: number
   lightLevel: number
-  lastWatered: string
   healthScore: number
 }
 
 export interface Plant {
   id: string
   name: string
+  dateLastWatered: Date | null
   species: string
   wateringFrequency: string
   notificationsEnabled: boolean
   addedAt: string
-  dateLastWatered: string | null
   stats: PlantStats | null
 }
 
@@ -61,7 +60,7 @@ function mapApiPlant(p: ApiPlant): Plant {
     wateringFrequency: daysToWateringFrequency(p.watering_frequency_days),
     notificationsEnabled: true,
     addedAt: p.date_created,
-    dateLastWatered: p.date_last_watered,
+    dateLastWatered: p.date_last_watered ? new Date(p.date_last_watered) : null,
     stats: null,
   }
 }
@@ -124,7 +123,7 @@ export const usePlantsStore = defineStore('plants', {
       }
     },
 
-    async updatePlant(id: string, data: { name?: string; species?: string; wateringFrequency?: string; dateLastWatered?: string }) {
+    async updatePlant(id: string, data: { name?: string; species?: string; wateringFrequency?: string; dateLastWatered?: Date }) {
       const auth = useAuthStore()
       const body: Record<string, unknown> = {}
       if (data.name !== undefined) body.name = data.name

@@ -119,7 +119,7 @@
               >
             </div>
             <p class="text-lg font-heading font-bold text-text-primary">
-              {{ plant.stats?.lastWatered || "No data" }}
+              {{ formatDate(plant.dateLastWatered) }}
             </p>
           </div>
 
@@ -292,7 +292,7 @@ const waterPlant = async () => {
     return;
   }
   await store.updatePlant(plant.value.id, {
-    dateLastWatered: new Date().toISOString(),
+    dateLastWatered: new Date(),
   });
 };
 
@@ -311,17 +311,7 @@ watch(
   },
 );
 
-const formattedDate = computed(() => {
-  if (!plant.value) return "";
-  const date = new Date(plant.value.addedAt);
-  return isNaN(date.getTime())
-    ? plant.value.addedAt
-    : date.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-});
+const formattedDate = computed(() => formatDate(plant.value?.addedAt));
 
 const plantAge = computed(() => {
   if (!plant.value) return "";
