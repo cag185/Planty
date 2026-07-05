@@ -28,7 +28,7 @@ interface ApiPlant {
   date_created: string
   date_updated: string
   date_deleted: string | null
-  date_last_watered: string | null
+  date_last_watered: Date | null
 }
 
 const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
@@ -60,7 +60,7 @@ function mapApiPlant(p: ApiPlant): Plant {
     wateringFrequency: daysToWateringFrequency(p.watering_frequency_days),
     notificationsEnabled: true,
     addedAt: p.date_created,
-    dateLastWatered: p.date_last_watered ? new Date(p.date_last_watered) : null,
+    dateLastWatered: p.date_last_watered ?? null,
     stats: null,
   }
 }
