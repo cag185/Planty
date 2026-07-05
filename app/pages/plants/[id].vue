@@ -75,6 +75,25 @@
           @submit="onEditPlant"
         />
         <!-- Info Cards -->
+        <div v-if="loading" class="my-4 pt-8 flex justify-center">
+          <WrappedLoadingIndicator :loading="loading" />
+        </div>
+        <div
+          v-if="
+            plant.dateLastWatered &&
+            !compareDateEq(plant.dateLastWatered, new Date())
+          "
+          class="pb-4 justify-items-center w-full"
+        >
+          <button
+            @click="waterPlant"
+            class="flex items-center gap-1.5 w-1/2 text-sm font-medium text-text-secondary hover:text-blue-600 bg-blue-50 hover:bg-blue-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+          >
+            <Droplets class="w-8 h-8 text-blue-400" />
+            <span class="pl-2">Mark this plant as watered today.</span>
+          </button>
+        </div>
+
         <div class="grid sm:grid-cols-2 gap-4 mb-8">
           <div class="bg-surface-50 rounded-2xl p-5 border border-surface-100">
             <div class="flex items-center gap-2 mb-1">
@@ -109,7 +128,7 @@
               >
             </div>
             <p class="text-lg font-heading font-bold text-text-primary">
-              {{ plant.stats?.lastWatered || "No data" }}
+              {{ formatDate(plant.dateLastWatered) }}
             </p>
           </div>
 
@@ -250,9 +269,12 @@ import {
   Sun,
   Activity,
   Bell,
+  Droplet,
 } from "lucide-vue-next";
 import { usePlantsStore } from "~/stores/plants";
+import { useToast } from "primevue/usetoast";
 
+const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const store = usePlantsStore();
@@ -260,21 +282,47 @@ const store = usePlantsStore();
 // Compute the current plant based on the route parameter
 const plant = computed(() => store.getPlantById(route.params.id as string));
 
+// Control if the form is loading.
+const loading = ref(false);
+
 // control the edit modal.
 const showEditModal = ref(false);
 
-async function onEditPlant(data: {
+const onEditPlant = async (data: {
   name: string;
   species: string;
   wateringFrequency: string;
-}) {
+}) => {
   if (!plant.value) {
     return;
   }
 
   await store.updatePlant(plant.value.id, data);
   showEditModal.value = false;
-}
+};
+
+const waterPlant = async () => {
+  if (!plant.value) {
+    return;
+  }
+  loading.value = true;
+  try {
+    await store.updatePlant(plant.value.id, {
+      dateLastWatered: new Date(),
+    });
+  } catch (error) {
+    console.error("Error saving changes:", error);
+  } finally {
+    loading.value = false;
+    toast.add({
+      group: "generic",
+      severity: "success",
+      summary: "Plant watered successfully",
+      detail: "The plant has been updated as watered successfully.",
+      life: 3000,
+    });
+  }
+};
 
 onMounted(() => {
   if (store.plants.length === 0) {
@@ -291,17 +339,7 @@ watch(
   },
 );
 
-const formattedDate = computed(() => {
-  if (!plant.value) return "";
-  const date = new Date(plant.value.addedAt);
-  return isNaN(date.getTime())
-    ? plant.value.addedAt
-    : date.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-});
+const formattedDate = computed(() => formatDate(plant.value?.addedAt));
 
 const plantAge = computed(() => {
   if (!plant.value) return "";
@@ -318,10 +356,10 @@ const plantAge = computed(() => {
   return `${months} months ago`;
 });
 
-function handleRemove() {
+const handleRemove = () => {
   if (plant.value) {
     store.removePlant(plant.value.id);
     router.push("/plants");
   }
-}
+};
 </script>
