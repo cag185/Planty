@@ -48,18 +48,25 @@
             </div>
           </div>
           <div
-            class="flex flex-col w-1/2 items-center sm:flex-row gap-2 sm:gap-8"
+            class="flex flex-col w-2/3 items-center sm:flex-row gap-2 sm:gap-8"
           >
             <button
               @click="showEditModal = true"
-              class="flex items-center gap-1.5 w-32 text-sm font-medium text-text-secondary hover:text-primary-600 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+              class="flex items-center gap-1.5 w-3/4 md:w-1/3 text-sm font-medium text-text-secondary hover:text-primary-600 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
             >
               <Pencil class="w-4 h-4" />
-              Edit Plant
+              <span class="text-justify">Edit Plant</span>
+            </button>
+            <button
+              @click="showWaterModal = true"
+              class="flex items-center gap-1.5 w-3/4 md:w-1/2 text-sm font-medium text-text-secondary hover:text-blue-600 bg-blue-50 hover:bg-blue-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+            >
+              <Droplets class="w-6 h-6 text-blue-400" />
+              <span class="pl-2">Water Plant</span>
             </button>
             <button
               @click="handleRemove"
-              class="flex items-center gap-1.5 w-32 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-200 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+              class="flex items-center gap-1.5 w-3/4 md:w-1/3 text-sm font-medium bg-red-50 text-red-600 hover:bg-red-200 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
             >
               <Trash2 class="w-4 h-4" />
               Remove
@@ -74,22 +81,13 @@
           @close="showEditModal = false"
           @submit="onEditPlant"
         />
+        <WaterPlantModal
+          :show="showWaterModal"
+          :plant="plant"
+          @dateLastWatered="onWaterPlant()"
+          @close="showWaterModal = false"
+        />
         <!-- Info Cards -->
-        <div v-if="loading" class="my-4 pt-8 flex justify-center">
-          <WrappedLoadingIndicator :loading="loading" />
-        </div>
-        <div
-          v-if="!compareDateEq(plant.dateLastWatered ?? null, new Date())"
-          class="pb-4 justify-items-center w-full"
-        >
-          <button
-            @click="waterPlant"
-            class="flex items-center gap-1.5 w-1/2 text-sm font-medium text-text-secondary hover:text-blue-600 bg-blue-50 hover:bg-blue-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
-          >
-            <Droplets class="w-8 h-8 text-blue-400" />
-            <span class="pl-2">Mark this plant as watered today.</span>
-          </button>
-        </div>
 
         <div class="grid sm:grid-cols-2 gap-4 mb-8">
           <div class="bg-surface-50 rounded-2xl p-5 border border-surface-100">
@@ -269,9 +267,7 @@ import {
   Droplet,
 } from "lucide-vue-next";
 import { usePlantsStore } from "~/stores/plants";
-import { useToast } from "primevue/usetoast";
 
-const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const store = usePlantsStore();
@@ -279,11 +275,11 @@ const store = usePlantsStore();
 // Compute the current plant based on the route parameter
 const plant = computed(() => store.getPlantById(route.params.id as string));
 
-// Control if the form is loading.
-const loading = ref(false);
-
 // control the edit modal.
 const showEditModal = ref(false);
+
+// control the water modal.
+const showWaterModal = ref(false);
 
 const onEditPlant = async (data: {
   name: string;
@@ -298,27 +294,8 @@ const onEditPlant = async (data: {
   showEditModal.value = false;
 };
 
-const waterPlant = async () => {
-  if (!plant.value) {
-    return;
-  }
-  loading.value = true;
-  try {
-    await store.updatePlant(plant.value.id, {
-      dateLastWatered: new Date(),
-    });
-  } catch (error) {
-    console.error("Error saving changes:", error);
-  } finally {
-    loading.value = false;
-    toast.add({
-      group: "generic",
-      severity: "success",
-      summary: "Plant watered successfully",
-      detail: "The plant has been updated as watered successfully.",
-      life: 3000,
-    });
-  }
+const onWaterPlant = () => {
+  showWaterModal.value = false;
 };
 
 onMounted(() => {
