@@ -79,10 +79,7 @@
           <WrappedLoadingIndicator :loading="loading" />
         </div>
         <div
-          v-if="
-            plant.dateLastWatered &&
-            !compareDateEq(plant.dateLastWatered, new Date())
-          "
+          v-if="!compareDateEq(plant.dateLastWatered ?? null, new Date())"
           class="pb-4 justify-items-center w-full"
         >
           <button
