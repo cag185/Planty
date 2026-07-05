@@ -75,6 +75,16 @@
           @submit="onEditPlant"
         />
         <!-- Info Cards -->
+        <div class="pb-4 justify-items-center w-full">
+          <button
+            @click="waterPlant"
+            class="flex items-center gap-1.5 w-1/2 text-sm font-medium text-text-secondary hover:text-blue-600 bg-blue-50 hover:bg-blue-100 border border-surface-200 rounded-xl py-2 px-4 transition-colors"
+          >
+            <Droplets class="w-8 h-8 text-blue-400" />
+            <span class="pl-2">Mark this plant as watered today.</span>
+          </button>
+        </div>
+
         <div class="grid sm:grid-cols-2 gap-4 mb-8">
           <div class="bg-surface-50 rounded-2xl p-5 border border-surface-100">
             <div class="flex items-center gap-2 mb-1">
@@ -250,6 +260,7 @@ import {
   Sun,
   Activity,
   Bell,
+  Droplet,
 } from "lucide-vue-next";
 import { usePlantsStore } from "~/stores/plants";
 
@@ -275,6 +286,15 @@ async function onEditPlant(data: {
   await store.updatePlant(plant.value.id, data);
   showEditModal.value = false;
 }
+
+const waterPlant = async () => {
+  if (!plant.value) {
+    return;
+  }
+  await store.updatePlant(plant.value.id, {
+    dateLastWatered: new Date().toISOString(),
+  });
+};
 
 onMounted(() => {
   if (store.plants.length === 0) {
@@ -318,10 +338,10 @@ const plantAge = computed(() => {
   return `${months} months ago`;
 });
 
-function handleRemove() {
+const handleRemove = () => {
   if (plant.value) {
     store.removePlant(plant.value.id);
     router.push("/plants");
   }
-}
+};
 </script>

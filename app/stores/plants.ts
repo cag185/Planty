@@ -17,6 +17,7 @@ export interface Plant {
   wateringFrequency: string
   notificationsEnabled: boolean
   addedAt: string
+  dateLastWatered: string | null
   stats: PlantStats | null
 }
 
@@ -28,6 +29,7 @@ interface ApiPlant {
   date_created: string
   date_updated: string
   date_deleted: string | null
+  date_last_watered: string | null
 }
 
 const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
@@ -59,6 +61,7 @@ function mapApiPlant(p: ApiPlant): Plant {
     wateringFrequency: daysToWateringFrequency(p.watering_frequency_days),
     notificationsEnabled: true,
     addedAt: p.date_created,
+    dateLastWatered: p.date_last_watered,
     stats: null,
   }
 }
@@ -121,12 +124,13 @@ export const usePlantsStore = defineStore('plants', {
       }
     },
 
-    async updatePlant(id: string, data: { name?: string; species?: string; wateringFrequency?: string }) {
+    async updatePlant(id: string, data: { name?: string; species?: string; wateringFrequency?: string; dateLastWatered?: string }) {
       const auth = useAuthStore()
       const body: Record<string, unknown> = {}
       if (data.name !== undefined) body.name = data.name
       if (data.species !== undefined) body.species = data.species
       if (data.wateringFrequency !== undefined) body.watering_frequency_days = wateringFrequencyToDays(data.wateringFrequency)
+      if (data.dateLastWatered !== undefined) body.date_last_watered = data.dateLastWatered
       try {
         await $fetch(`${BASE_URL()}/plants/${id}`, {
           method: 'PUT',
@@ -138,6 +142,7 @@ export const usePlantsStore = defineStore('plants', {
           if (data.name !== undefined) plant.name = data.name
           if (data.species !== undefined) plant.species = data.species
           if (data.wateringFrequency !== undefined) plant.wateringFrequency = data.wateringFrequency
+          if (data.dateLastWatered !== undefined) plant.dateLastWatered = data.dateLastWatered
         }
       } catch (error: any) {
         if (!auth.handleAuthError(error)) throw error
