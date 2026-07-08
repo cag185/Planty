@@ -126,6 +126,29 @@
               {{ formatDate(plant.dateLastWatered) }}
             </p>
           </div>
+          <div
+            v-if="plant.dateLastWatered"
+            class="bg-surface-50 rounded-2xl p-5 border border-surface-100"
+          >
+            <div class="flex items-center gap-2 mb-1">
+              <Droplets class="w-4 h-4 text-yellow-300" />
+              <span class="text-sm font-medium text-text-secondary"
+                >Water Info</span
+              >
+            </div>
+            <p class="text-lg font-heading font-bold">
+              <span :class="computeWateringDueDateColor"
+                >Plant needs water in
+                {{
+                  getWateringDueDate(
+                    plant.wateringFrequency,
+                    plant.dateLastWatered,
+                  )
+                }}
+                days.</span
+              >
+            </p>
+          </div>
 
           <div class="bg-surface-50 rounded-2xl p-5 border border-surface-100">
             <div class="flex items-center gap-2 mb-1">
@@ -266,7 +289,7 @@ import {
   Bell,
   Droplet,
 } from "lucide-vue-next";
-import { usePlantsStore } from "~/stores/plants";
+import { usePlantsStore, wateringFrequencyToDays } from "~/stores/plants";
 
 const route = useRoute();
 const router = useRouter();
@@ -297,6 +320,47 @@ const onEditPlant = async (data: {
 const onWaterPlant = () => {
   showWaterModal.value = false;
 };
+
+const getWateringDueDate = (
+  wateringFrequency: string,
+  dateLastWatered: Date | null,
+): number => {
+  if (!dateLastWatered) return 0;
+  const lastWatered = new Date(dateLastWatered);
+  if (isNaN(lastWatered.getTime())) return 0;
+  const lastWateredDate = new Date(
+    lastWatered.getFullYear(),
+    lastWatered.getMonth(),
+    lastWatered.getDate(),
+  );
+  const today = new Date();
+  const todayDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+  const diffMs = todayDate.getTime() - lastWateredDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const frequencyDays = wateringFrequencyToDays(wateringFrequency);
+  const dueDate = frequencyDays - diffDays;
+  return dueDate;
+};
+
+const computeWateringDueDateColor = computed(() => {
+  if (
+    !plant.value ||
+    !plant.value.dateLastWatered ||
+    !plant.value.wateringFrequency
+  )
+    return "text-gray-500";
+  const dueDate = getWateringDueDate(
+    plant.value.wateringFrequency,
+    new Date(plant.value.dateLastWatered),
+  );
+  if (dueDate <= 0) return "text-red-600";
+  if (dueDate <= 2) return "text-yellow-500";
+  return "text-green-500";
+});
 
 onMounted(() => {
   if (store.plants.length === 0) {
