@@ -33,7 +33,7 @@ interface ApiPlant {
 
 const BASE_URL = () => useRuntimeConfig().public.apiBaseUrl
 
-function wateringFrequencyToDays(freq: string): number {
+export function wateringFrequencyToDays(freq: string): number {
   if (freq === 'Daily') return 1
   if (freq === 'Every 2-3 days') return 2
   if (freq === 'Weekly') return 7
