@@ -231,16 +231,18 @@ async function handleSubmit() {
       return;
     }
 
-    const success = await auth.signup(
-      firstName.value,
-      email.value,
-      password.value,
-    );
-    if (success) {
-      await notificationStore.getNotifications();
-      router.push("/plants");
-    } else {
-      serverError.value = "Sign up failed. Please try again.";
+    try {
+      const success = await auth.signup(
+        firstName.value,
+        email.value,
+        password.value,
+      );
+      if (success) {
+        await notificationStore.getNotifications();
+        router.push("/plants");
+      }
+    } catch (error: any) {
+      serverError.value = error?.message ?? "Sign up failed. Please try again.";
     }
   } else {
     const result = loginSchema.safeParse({
