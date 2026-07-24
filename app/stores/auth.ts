@@ -67,8 +67,9 @@ export const useAuthStore = defineStore('auth', {
         const notificationsStore = useNotificationsStore()
         notificationsStore.connectSocket()
         return true
-      } catch {
-        return false
+      } catch (error: any) {
+        const message = error?.data?.error ?? 'Sign up failed. Please try again.'
+        throw new Error(message)
       }
     },
 
